@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mihir Vendor Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a serious procurement desk for a builder — quiet, dense, exact; nothing decorative that doesn't carry work.
+   IDEA: the purchase file passing desk to desk; the sidebar is the office, each module a desk.
+   PICTURE: dashboard opens on the live procurement pipeline + an inbox of what needs a decision.
+   COLOUR and TYPE: neutral greys, Mihir navy sidebar, copper only for primary actions & the active state; Geist + Geist Mono numerals.
+   LAYOUT: fixed sidebar, sticky top bar with search + role, content max 1280; drawer from the right for records; stacks under 900px. */
+:root{color-scheme:light;
+--bg:light-dark(#f5f6f8,#0a0c11);--sf:light-dark(#ffffff,#11141b);--sf2:light-dark(#f9fafb,#161a23);--hov:light-dark(#f3f4f6,#1b2029);
+--ln:light-dark(#e5e7eb,#222835);--ln2:light-dark(#eef0f3,#1a1f2a);
+--ink:light-dark(#111827,#e8ebf1);--ink2:light-dark(#4b5563,#a7afc0);--mute:light-dark(#8a93a3,#6b7385);
+--side:#151c2c;--side2:#1d2639;--sideInk:#aab3c5;
+--cu:#c8783f;--cuH:#b5682f;--cuInk:light-dark(#9a5423,#e8a271);--cuSoft:light-dark(#fbf2ea,#2a1e15);
+--ok:light-dark(#067647,#4ade80);--okS:light-dark(#ecfdf3,#0f2a1c);--okB:light-dark(#abefc6,#1d4a32);
+--bad:light-dark(#b42318,#f97066);--badS:light-dark(#fef3f2,#2f1513);--badB:light-dark(#fecdca,#55231f);
+--warn:light-dark(#b54708,#fdb022);--warnS:light-dark(#fffaeb,#2d2210);--warnB:light-dark(#fedf89,#4d3a12);
+--blue:light-dark(#175cd3,#84adff);--blueS:light-dark(#eff8ff,#111e36);--blueB:light-dark(#b2ddff,#1f3561);
+--sh:0 1px 2px rgb(16 24 40/.05);--sh2:0 12px 40px rgb(16 24 40/.18);
+--mono:"Geist Mono",ui-monospace,monospace}
+:root,:root[data-theme=dark],:root[data-theme=light]{color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Geist,system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;letter-spacing:-.018em;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(20px,2.2vw,24px);font-weight:600}h2{font-size:17px;font-weight:600}h3{font-size:14.5px;font-weight:600}
+a{color:var(--cuInk);text-decoration:none}
+svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.num,.mono{font-family:var(--mono);font-size:.94em;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.num{text-align:right;white-space:nowrap}
+/* shell */
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+#side{background:var(--side);color:var(--sideInk);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:14px 10px;overflow-y:auto}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 16px}
+.brand .lg{width:36px;height:36px;border-radius:9px;background:#fff;padding:3px;flex:none}
+.brand .lg img{width:100%;height:100%;object-fit:contain}
+.brand b{display:block;color:#fff;font-size:14.5px;font-weight:600;letter-spacing:-.01em}.brand span{font-size:12px;color:#7f8aa3}
+.grp{font-size:11.5px;color:#6c7891;padding:14px 10px 6px;font-weight:500}
+#nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--sideInk);font-weight:500;font-size:13.5px;position:relative;margin:1px 0}
+#nav a:hover{background:#ffffff0d;color:#fff}
+#nav a.on{background:var(--side2);color:#fff}
+#nav a.on:before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--cu)}
+#nav a .n{margin-left:auto;font:500 11.5px var(--mono);background:#ffffff14;color:#fff;border-radius:6px;padding:1px 6px}
+#nav a .n.hot{background:var(--cu)}
+.sidefoot{margin-top:auto;padding:12px 10px 4px;border-top:1px solid #ffffff12;font-size:12px;color:#7f8aa3;display:flex;gap:8px;align-items:center}
+.sdot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px #4ade8026;flex:none}
+.sdot.local{background:#fdb022;box-shadow:0 0 0 3px #fdb02226}
+.mainw{display:flex;flex-direction:column;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:8;height:58px;background:color-mix(in srgb,var(--sf) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:12px;padding:0 24px}
+#menu{display:none}
+.crumb{font-size:13.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.crumb b{color:var(--ink);font-weight:500}
+.search{position:relative;margin-left:auto;width:min(340px,40vw)}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--mute)}
+.search input{padding-left:32px;padding-right:34px;height:36px;background:var(--sf2)}
+.search kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font:500 11px var(--mono);border:1px solid var(--ln);border-radius:5px;padding:1px 6px;color:var(--mute);background:var(--sf)}
+#gsr{position:absolute;top:42px;left:0;right:0;background:var(--sf);border:1px solid var(--ln);border-radius:10px;box-shadow:var(--sh2);padding:6px;display:none;max-height:380px;overflow:auto}
+#gsr.on{display:block}
+#gsr button{width:100%;justify-content:flex-start;border:0;box-shadow:none;background:none;height:auto;padding:8px 10px;font-weight:400;gap:10px}
+#gsr button:hover,#gsr button:focus{background:var(--hov)}
+#gsr small{margin-left:auto;color:var(--mute)}
+.who{display:flex;align-items:center;gap:8px;border:1px solid var(--ln);border-radius:9px;padding:3px 4px 3px 4px;background:var(--sf)}
+.who select{border:0;background:transparent;height:30px;padding:0 4px;font-weight:500;width:auto;max-width:210px;box-shadow:none}
+main{padding:26px 28px 70px;width:100%;max-width:1320px;margin:0 auto}
+/* controls */
+button,.btn{font:500 13.5px Geist,sans-serif;height:36px;padding:0 13px;border-radius:8px;border:1px solid var(--ln);background:var(--sf);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:var(--sh);transition:background .12s,border-color .12s}
+button:hover,.btn:hover{background:var(--hov)}
+button.pri,.btn.pri{background:var(--cu);border-color:var(--cuH);color:#fff;box-shadow:0 1px 2px rgb(16 24 40/.1),inset 0 1px 0 #ffffff2e}
+button.pri:hover,.btn.pri:hover{background:var(--cuH)}
+button.danger{color:var(--bad)}button.danger:hover{background:var(--badS);border-color:var(--badB)}
+button.ghost{border-color:transparent;box-shadow:none;background:transparent}
+button.sm,.btn.sm{height:30px;padding:0 10px;font-size:13px}
+.btn.wa{color:light-dark(#0b7a3e,#4ade80)}
+.btn.wa:before{content:"";width:14px;height:14px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z'/%3E%3C/svg%3E") center/contain no-repeat}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--cu);outline-offset:2px}
+input,select,textarea{font:14px Geist,sans-serif;padding:0 11px;height:38px;border:1px solid var(--ln);border-radius:8px;background:var(--sf);color:var(--ink);width:100%;box-shadow:var(--sh)}
+textarea{height:auto;min-height:76px;padding:9px 11px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cu);box-shadow:0 0 0 3px color-mix(in srgb,var(--cu) 18%,transparent)}
+label{display:block;font-size:12.5px;font-weight:500;color:var(--ink2)}
+label>input,label>select,label>textarea{margin-top:6px;font-weight:400}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+/* page header */
+.ph{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px}
+.ph p{margin:4px 0 0;color:var(--ink2);font-size:13.5px;max-width:72ch}
+.eyebrow{font-size:12.5px;color:var(--mute);margin-bottom:4px}
+/* cards */
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:12px;box-shadow:var(--sh)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--ln2)}
+.ch p{margin:2px 0 0;font-size:12.5px;color:var(--mute)}
+.cb{padding:16px 18px}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));margin:0 0 16px}
+.kpi{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:14px 16px;box-shadow:var(--sh)}
+.kpi span{display:flex;align-items:center;gap:7px;color:var(--ink2);font-size:12.5px;font-weight:500}
+.kpi b{display:block;font:600 clamp(20px,2vw,24px)/1.25 var(--mono);letter-spacing:-.03em;margin-top:8px;white-space:nowrap}
+.kpi small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}
+.two{display:grid;gap:16px;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);margin-top:16px}
+@media(max-width:1050px){.two{grid-template-columns:minmax(0,1fr)}}
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(9,minmax(104px,1fr));overflow-x:auto}
+.st{padding:14px 14px 16px;border-right:1px solid var(--ln2);color:var(--ink);position:relative;transition:background .12s}
+.st:last-child{border-right:0}.st:hover{background:var(--hov)}
+.st .k{font:600 24px/1.1 var(--mono);letter-spacing:-.03em;color:var(--mute)}
+.st.hot .k{color:var(--ink)}
+.st b{display:block;font-size:13px;font-weight:600;margin-top:8px}.st small{display:block;font-size:12px;color:var(--mute);line-height:1.3}
+.st .tick{position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--ln)}
+.st.hot .tick{background:var(--cu)}
+/* inbox */
+.inbox{list-style:none;margin:0;padding:0}
+.inbox li{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--ln2)}
+.inbox li:last-child{border-bottom:0}
+.ico{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--sf2);border:1px solid var(--ln);color:var(--ink2)}
+.ico.warn{background:var(--warnS);border-color:var(--warnB);color:var(--warn)}.ico.bad{background:var(--badS);border-color:var(--badB);color:var(--bad)}.ico.blue{background:var(--blueS);border-color:var(--blueB);color:var(--blue)}.ico.cu{background:var(--cuSoft);color:var(--cuInk);border-color:transparent}
+.inbox .t{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.inbox .m{font-size:12.5px;color:var(--mute)}
+.age{display:flex;height:10px;border-radius:6px;overflow:hidden;background:var(--ln2);gap:2px;margin:6px 0 14px}
+.age i{display:block;height:100%}
+.leg{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px 10px;align-items:center;font-size:13px}
+.leg i{width:10px;height:10px;border-radius:3px}
+.vbar{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0}
+.bar{height:5px;border-radius:4px;background:var(--ln2);overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--navy,#26324f);background:light-dark(#26324f,#8fa3cf)}
+.feed{list-style:none;margin:0;padding:6px 18px 12px}
+.feed li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:12px;padding:8px 0;position:relative;font-size:13px}
+.feed li:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ln);border:2px solid var(--sf);box-shadow:0 0 0 1px var(--ln);margin-top:6px}
+.feed li:after{content:"";position:absolute;left:4.5px;top:22px;bottom:-8px;width:1px;background:var(--ln2)}
+.feed li:last-child:after{display:none}
+.feed small{color:var(--mute);white-space:nowrap}
+/* avatar */
+.av{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font:600 11px Geist,sans-serif;color:#fff;flex:none;letter-spacing:.02em}
+.vc{display:flex;gap:10px;align-items:center}.vc b{font-weight:500;display:block}.vc small{color:var(--mute);font-size:12px}
+/* tables */
+.tbl{background:var(--sf);border:1px solid var(--ln);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:12px;color:var(--mute);font-weight:500;padding:9px 14px;background:var(--sf2);border-bottom:1px solid var(--ln);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--ln2);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--hov)}
+td b{font-weight:500}
+.l1{background:var(--okS)!important;color:var(--ok);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:1px 8px 1px 7px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;border:1px solid var(--ln);background:var(--sf2);color:var(--ink2)}
+.pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.9}
+.p-ok{background:var(--okS);color:var(--ok);border-color:var(--okB)}.p-bad{background:var(--badS);color:var(--bad);border-color:var(--badB)}.p-warn{background:var(--warnS);color:var(--warn);border-color:var(--warnB)}.p-blue{background:var(--blueS);color:var(--blue);border-color:var(--blueB)}.p-cu{background:var(--cuSoft);color:var(--cuInk);border-color:transparent}
+.mute{color:var(--mute)}.small{font-size:12.5px}
+.empty{padding:44px 20px;text-align:center;color:var(--mute)}
+.empty svg{width:28px;height:28px;margin-bottom:8px;color:var(--ln)}
+.note{background:var(--warnS);color:var(--warn);border:1px solid var(--warnB);padding:10px 14px;border-radius:10px;font-size:13.5px;margin-bottom:14px}
+.note.ok{background:var(--okS);color:var(--ok);border-color:var(--okB)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters input{max-width:280px}.filters select{max-width:200px}
+.skel{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--ln2),var(--hov),var(--ln2));background-size:200% 100%;animation:sk 1.2s infinite;margin:10px 0}
+@keyframes sk{to{background-position:-200% 0}}
+/* welcome */
+.hello{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);overflow:hidden}
+.hello .l{padding:36px}.hello .l p{color:var(--ink2);max-width:56ch;margin:10px 0 22px}
+.hello ol{margin:0;padding:28px 32px;background:var(--side);color:#c9d1e0;list-style:none;counter-reset:s;display:grid;gap:14px;align-content:center}
+.hello ol li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:10px;font-size:13.5px}
+.hello ol li:before{content:counter(s);width:24px;height:24px;border-radius:7px;background:#ffffff14;color:#fff;display:grid;place-items:center;font:600 12px var(--mono)}
+.hello ol b{color:#fff;font-weight:500;display:block}
+@media(max-width:800px){.hello{grid-template-columns:1fr}}
+/* drawer */
+#ov{position:fixed;inset:0;background:rgb(10 12 17/.45);display:none;z-index:20;backdrop-filter:blur(2px)}
+#ov.on{display:block}
+#md{position:absolute;top:0;right:0;bottom:0;width:min(820px,100%);background:var(--bg);box-shadow:var(--sh2);overflow-y:auto;animation:sl .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes sl{from{transform:translateX(24px);opacity:.4}}
+#md .mh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 22px;border-bottom:1px solid var(--ln);position:sticky;top:0;background:var(--sf);z-index:2}
+#md .mb{padding:20px 22px 40px}
+.sec{margin-top:22px}.sec>h3{margin-bottom:10px}
+.chk{display:flex;gap:9px;align-items:center;padding:9px 11px;border:1px solid var(--ln);border-radius:9px;font-weight:500;color:var(--ink);background:var(--sf);font-size:13.5px}
+.chk:has(input:checked){border-color:var(--cu);background:var(--cuSoft)}
+.chk input{width:16px;height:16px;box-shadow:none;accent-color:var(--cu)}
+.kyc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--ln2)}
+.kyc:last-child{border-bottom:0}
+.val{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:6px}
+.val li{display:flex;gap:8px;align-items:center;font-size:13px;padding:7px 10px;border-radius:8px;background:var(--sf);border:1px solid var(--ln2)}
+.val .y{color:var(--ok)}.val .n{color:var(--bad)}
+.doc{border:1px solid #e5e7eb;border-radius:12px;padding:26px;background:#fff;color:#111827;box-shadow:var(--sh)}
+.doc .dh{display:flex;justify-content:space-between;gap:12px;border-bottom:2px solid #c8783f;padding-bottom:14px;margin-bottom:14px;flex-wrap:wrap}
+.doc img{width:52px}
+.doc table td,.doc table th{border-color:#eef0f3;color:#111827;background:#fff}
+#toast{position:fixed;bottom:20px;right:20px;background:#111827;color:#fff;padding:11px 16px;border-radius:10px;font-weight:500;font-size:13.5px;display:none;z-index:30;max-width:90vw;box-shadow:var(--sh2)}
+@media(prefers-reduced-motion:reduce){#md,.skel{animation:none}}
+@media(max-width:900px){.app{grid-template-columns:1fr}#side{position:fixed;left:0;top:0;width:264px;z-index:40;transform:translateX(-100%);transition:transform .2s}body.nav-open #side{transform:none;box-shadow:var(--sh2)}#menu{display:inline-flex}.topbar{padding:0 14px}main{padding:20px 14px 60px}.crumb{display:none}.search{width:auto;flex:1}.search kbd{display:none}button,.btn{height:40px}button.sm,.btn.sm{height:34px}input,select{height:42px;font-size:16px}}
+@media(max-width:600px){.who select{max-width:110px}.kpi b{font-size:18px}.kpi{padding:12px}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--ln2)}.stack td{display:flow-root;border:0;padding:3px 14px;padding-inline-start:8.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute);font-size:12px}.stack td:empty{display:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<div class="app">
+<aside id="side">
+  <div class="brand"><div class="lg"><img id="logoimg" alt="Mihir" src=""></div><div><b>Mihir Group</b><span>Vendor &amp; procurement</span></div></div>
+  <nav id="nav"></nav>
+  <div class="sidefoot"><span class="sdot" id="sdot"></span><span id="sync">Connecting…</span></div>
+</aside>
+<div class="mainw">
+  <div class="topbar">
+    <button class="ghost sm" id="menu" aria-label="Menu"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="crumb" id="crumb"></div>
+    <div class="search" id="gsw"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="gs" placeholder="Search vendors, RFQs, POs, bills" autocomplete="off" aria-label="Search"><kbd>/</kbd><div id="gsr"></div></div>
+    <div class="who"><span class="av" id="whoav" style="background:#26324f">PT</span><select id="role" aria-label="Working as"></select></div>
+  </div>
+  <main id="view"></main>
+</div>
+</div>
+<div id="ov"><div id="md" role="dialog" aria-modal="true"><div class="mh"><h2 id="mt"></h2><button class="sm ghost" data-act="close" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div class="mb" id="mbody"></div></div></div>
+<div id="toast"></div>
+<script>
+{
+const LOGO='data:image/png;base64,'+[
+'iVBORw0KGgoAAAANSUhEUgAAAGAAAABcCAMAAACm/kDcAAAASFBMVEX//////v////3///f+/v/+/vr8/v34//3+/P36/P39/fb9+vHy7ujj2MvKvK7EpYbVlWHJiVe7hFyahnlMUGM4QV83Plk0OVD0tbifAAAKS0lEQVR42q1ZiZbjKAw0GDBgIIcT5///dKsEJE6n20lvD29nx+NDhaTSgTIMu8s4F0Kc5znlXMqhr5Jzws1pCt4M/2+ZQQ/KGDeJ/NxkF1kdZJ6jdUAw5vcoxhnrfZimycWUq7zETctKSRAL1bDBOWd+rQj2HoLxPs4inqJitDaOXNbaca4YOVlsYoy/BtDa4cNmHBrc16W0LBvpl5wJHaYwz78HsAAIc6J4GCTHYIIAiHbGW+9szvK8QDkb/P8AcBHbpytTKXMMziilO4A3UywHiKYBk5uA/SsHYNk4Z26fZjpQVKRtTFtQIB2OOU4jlUjBw2OfA2A72JPIx87jXI5HXFiFhbiQZac5H49lnmLdh/9VQLgAClX58xRsPhyPUKHuHrK5QF65O4LJ8uYYNanxiXW0BbUDjQvXTtFTgSOwwEdHCZoAlHqkCp4ckr2MIJf+xP4QgP8Sv/EhWs+tUtRIgKEBBIGFCrZGOvwQrRaSfaJCHOfCPQcXfZStUgXwyjQAxF+/CyVHuGnBDvwnKYMAsqVCm2hbLVRVcBuA+107OetjKktGNLgPAgBZiPuDyvCfU7YqIG6uVNTMGKnfBVMdWCtfjJ9wlQCzGAiJKOJP26owNdw16LBUAa43QXT2DGjzJgeBiFFe9n7GnvtWKYrRXAHmOyzcbMcRrCMrog9vUzfzNBUYAzUI/r5VWgOfI5qdHbd3EYKjZdwsVMFAHwTkDkAwo3gYGkzTZqtUIVhyPbjt3cMs6RrxBi/44KDgPgBcAEbMQfLZw9bNGuYVIINt1jCglwId8cIuwGC0UMh65J2ZCeexkA9gQJDx6TYSEtgGAHw3',
+'O6qo1W4lszQm9YQz0kaB4wm4zo3W1UT0UCyAqXAMNQcB9F5GMj7YkRydnFc+zlsLCVOnEEcI29oISRvsgunHvEBHq/eIhFJFDiUAiAblSf6J1gAAfP/km1ks5xxtxPJsnNkBgPpgvACMXxSAjQjAWvfs5tHSNcKj0XrjdgBalEXUQAeynJ/kH88l8mtmqw32mWlKs4SUBenCsO79DEC2IcoCahpS9mkj/nSiCipMRtlp6/4T9w21dJRP3wIUvuUAEDOkbgGgAmgCAI+GpmrHu6czqo2ZXPXypwCDyDj1VeWfxBoEmOCq+8MzVNCOVXApnwKgTaCI4+nLYupxSrNn2sCf4Wb0gQQAod4DMLF7McJX+VRhBsFgcVDsvLmLzO5HavABACuHM6gp59MrAGLEKc/GZd4AIMYBYD8EgImcg77fyBeHUgNQBi/wDflzzg8AtwuAEi65FKTebPB43qpAM6PzaypWACakSXyAbn6nezEk58J+IqRGQdn1BgwORagpbSvLzm2hNk9CU08AtQMgyXQMY9laeMsYFqPa2+TzY0ndKR1gR4NgEwCi27gYZq/mvtvIAgB5E1a8L3QtkbmIfb01e/XAztJL5yeJFHW3EfAJYMOTCuAvs6n3ehdg8FYqZg2jcyc5GdNu0KGojCj005MK2BVJpD2e7AAoZaU92DIERRdR/QA45wYAo29tJBXNvwOQgnBoeaBt2EpeqsJP4tAGYNPWzazlSAF21OZdW7TkbnMxrhOKV+HCy4xARH+E6n/YegGa80Cr3/S+DMgneowEeBYVeSSTVzd3ySQ/vOns0NJo+q6d6bGYPlkjn0iftJz5pAm8L9L7PYBXEswgnRy60clL8LOD2SDkCoDDlq1H83EES3Hs/wRA7MG4gaHBCStFmM1Gl07HRyeHPjR0nCTAhjiaYxTwvntXzPVsZEFrDwDFgx97bj8KUxtAeQDU5TiVQbn+5ACiFPp2MsLSNKYODxjhpQGIidqxlU+c',
+'xLUyITjzyZRFMdgSjcRz5UAABcuGmDeZzVYAHhg5+UFUaDm/fzInYvvF6seyME1eyfkbo53wYCpypu8HlvbXB0fkbX/HtnRhCE9GAJCiwnQnPXPmb4cfXwEs3cCsCrtCKQRHQCI/9DhDb/xHAMeCtfAoyHmWRorigbv0gP0jgPCP8uiHyLkcVEJfFdNSXewmM/wVgI0a/LBg3IRcgTKCYlpVQHKy7s8AAwQS4bDImIPzHdQXSUgsmW74OwCzAI78MBPbRSx4mTmVLYH1fwcYQHyZyUKJhYMvzBoxKchnNJYIb/V3AM7lcGLjcBEQS531jmmRA9M/kN9AkI44NCvEWFgkDiX+SwBkMmRwji0aBlSBhf4ZQJ9AKtYFDpQxIU//xMPP0xeZk0rVQdaMXql/qAAGA45nJmQ3w2EzCsRvAWRaqXq/WtOuDByY8LlrIxr4Os2kOpRvpAzxYy2Xg5LCodV9sUrJRuToH+4Alr23Zrnn9IqzDUsroV1isLFpM3UHrDFG5kfyRt2B5ni7LosK3QE8omoDwP9zRum58zroxXiiqhAqwMAX+Abke0olAEdVbbFlsm3TAAjpPhiuNRBPU3IEqEkH9Tx0UlWA9j7rRLvvv5wKRG0BcEO+ZP4YcXcChlFhWTAcg1xpvhLiLdWrXndz/SfmnvUKPanO5bFyGhqCC0O5XULXgZ4KvLUEmEWly+12uyQTh3zjKoOXyMALWNeEPne5ySva8t5aFy4uhbnMEMDgQTH9ZxgYyQfIvSRwUoULXr8kG3W+rdd1C3C94gHYs+CKe7Byry1grNgiAfAz03Ljq/7uBa/KSoAoANcOwO9eALwArBVgbcJXXqwwAgGiI8BtQeMjNAYXXOK+8xDtkCqAfgCYdwC0z41Xt0smI6KBPa7rNZso80IMFZ1oXQYwqgEMdiDACgBp8/QrgB7bPfHxhZcQoQiQIf7anMredGg3vgewMt7/EQCmxbZNWkQE3Rqrb/htAAJmt4Gf',
+'8Km9m+hZA1J5BwAn3CjmwqYfAHwSSKDQTAnq6leA3OOIL31vosSfB0y5dgBrlsquG1VA+0OXXOvX+gVg6YG0/AzAhlWsAKJqxkEHuCRHgHKrZBAOPAOQ3m31PbwCZK6lbZnT+rZj0cjC5Ze1xUp5AVjXRyT9AIDLGsyyYwavrhJXCsouVt0a/mg7QOwatCBaO4D5CtDj7Hpbi/w+qPNK6UtVwWWx7cJ8siDS7oHWAa59fw3AfQdQHxb+/Ek+yJYz3kNkiL3WQj/ARaP+ClByW93JLwDr9SImuRXHH8kA0F7IIqrGhziaKegLwDc0fQG4YA+X6m0nAKG9wIy0VuvnIVNNALyYiPkDy78CmNhpaipRbkuSChgIx8TX2SSeEC2z1j8APCL5GwApACLIsa6nijaE7qNLrhuHND28AjgZK+4CMB03g5owVHXA+VCNtRaDDN5u6m8BWAtfAPQGAF34pSU+2TeTv8YPC8yiUmiAVZ3tO0CP5NzqQQdAVugauIHUoFB0Ak7yAS0/0LdSs6ykURRPDCjNBoDFzRKAJTO/FBzzBLCuFUDKpFSEVrODjjXPARPzjVrTEeqt6PtH0a8/W5tW9JXvRd8EKfpVg0ieyL/yUHvywLEKFFsShxqggdxOKBzyN0umXHUNXHsBvVe7QoXvHxlBqP8q/wEAMhnvZpcERQAAAABJRU5ErkJggg=='
+].join('');document.querySelector('#logoimg').src=LOGO;
+const IC={home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-6M22 20H2"/>',cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.5L22 7H6"/>',truck:'<path d="M1 4h14v12H1zM15 8h4l4 4v4h-8"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/>',receipt:'<path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>',wallet:'<path d="M20 7H5a2 2 0 0 1 0-4h13v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15V7"/><path d="M16 14h.01"/>',book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',pulse:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',plus:'<path d="M12 5v14M5 12h14"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',users:'<circle cx="9" cy="8" r="4"/><path d="M2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1M16 3.5a4 4 0 0 1 0 8M22 21v-1a6 6 0 0 0-4-5.6"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/>',copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',rupee:'<path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a5 5 0 0 0 0-10"/>'};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24">${IC[n]||''}</svg>`;
+const AVC=['#26324f','#9a5423','#0e7490','#4d7c0f','#7c3aed','#be123c','#0369a1','#b45309','#475569'];
+const av=(name,sz)=>{const n=String(name||'?');const ini=n.split(/\s+/).filter(w=>/[A-Za-z]/.test(w[0]||'')).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';let h=0;for(const ch of n)h=(h*31+ch.charCodeAt(0))>>>0;return `<span class="av" style="background:${AVC[h%AVC.length]}${sz?';width:'+sz+'px;height:'+sz+'px':''}">${esc(ini)}</span>`};
+const vcell=(id,sub)=>{const v=V(id);return `<div class="vc">${av(v.name)}<div><b>${esc(v.name)}</b>${sub!==undefined?`<small>${esc(sub)}</small>`:''}</div></div>`};
+const K=['vendors','rfqs','quotes','pos','grns','bills','pays','log','settings'];
+const S={vendors:[],rfqs:[],quotes:[],pos:[],grns:[],bills:[],pays:[],log:[],settings:{projects:['Sample project A – Tower 1','Sample project B – Commercial'],cats:['Cement','Steel (TMT)','Sand & aggregates','Plumbing','Electrical','Tiles','Paint','Hardware','Shuttering','RMC']}};
+const DOCS=[['gst','GST registration certificate',1],['pan','PAN card',1],['cheque','Cancelled cheque / bank letter',1],['addr','Address proof / Shop Act',1],['msme','MSME / Udyam certificate',0],['inc','Incorporation / partnership deed',0]];
+const ROLES={purchase:'Purchase team',head:'Purchase head (approver)',accounts:'Accounts team'};
+let role='purchase',db=null,loaded=false;
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr=n=>{const v=Math.round((+n||0)*100)/100;return '₹'+v.toLocaleString('en-IN',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2})};
+const num=v=>{const n=parseFloat(String(v).replace(/,/g,''));return isFinite(n)?n:0};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const today=(d=0)=>{const t=new Date();t.setDate(t.getDate()+d);return t.toISOString().slice(0,10)};
+const addDays=(s,d)=>{const t=new Date(s);t.setDate(t.getDate()+d);return t.toISOString().slice(0,10)};
+const fd=s=>s?new Date(s).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const V=id=>S.vendors.find(v=>v.id===id)||{name:'(removed vendor)'};
+const nextNo=(p,list)=>p+'-'+String(list.length+1).padStart(3,'0');
+const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2600)};
+const pill=(s)=>{const m={Approved:'ok',Paid:'ok',Received:'ok',Matched:'ok',Awarded:'ok',Acknowledged:'ok','KYC Submitted':'warn','Pending approval':'warn',Submitted:'warn','Part paid':'blue','Partly received':'blue',Sent:'blue',Open:'blue',Comparing:'cu','On hold':'bad',Rejected:'bad',Mismatch:'bad',Blacklisted:'bad',Overdue:'bad',Draft:'',Invited:'cu','Approved – unpaid':'warn'};return `<span class="pill p-${m[s]??''}">${esc(s)}</span>`};
+const isVendor=()=>role.startsWith('vendor:');const myId=()=>role.slice(7);
+const can=a=>({approvePO:['head'],approveBill:['accounts','head'],pay:['accounts'],kyc:['purchase','head']}[a]||[]).includes(role);
+function log(msg){S.log.unshift({t:new Date().toISOString(),who:isVendor()?V(myId()).name:ROLES[role],msg});S.log=S.log.slice(0,150);save('log')}
+
+/* ---------- persistence ---------- */
+const dirty={},writing={};
+function save(k){dirty[k]=true;if(!db){try{localStorage.setItem('mihir-vp-'+k,JSON.stringify(S[k]))}catch(e){}dirty[k]=false;return}flush(k)}
+async function flush(k){if(writing[k])return;writing[k]=true;while(dirty[k]){dirty[k]=false;try{await db.doc('portal/'+k).set({v:JSON.parse(JSON.stringify(S[k]))})}catch(e){if(e&&e.code==='unavailable'){await new Promise(r=>setTimeout(r,800+Math.random()*800));dirty[k]=true}else{toast('Could not save: '+(e&&e.message||'error'));break}}}writing[k]=false;sync()}
+function sync(){$('#sync').textContent=db?(Object.values(writing).some(Boolean)?'Saving…':'All changes saved · shared'):'Saved in this browser only';$('#sdot').className='sdot'+(db?'':' local')}
+function loadLocal(){for(const k of K){try{const v=localStorage.getItem('mihir-vp-'+k);if(v)S[k]=JSON.parse(v)}catch(e){}}}
+let rT;const rerender=()=>{clearTimeout(rT);rT=setTimeout(render,60)};
+async function boot(){render();let d=null;try{d=window.claude&&await window.claude.use('db')}catch(e){}
+  if(!d){loadLocal();loaded=true;sync();render();return}
+  db=d;let got=0;const tm=setTimeout(()=>{if(!loaded){$('#sync').textContent='Data not reachable yet…'}},10000);
+  for(const k of K){db.doc('portal/'+k).onSnapshot(s=>{if(!dirty[k]&&!writing[k]&&s.exists){const v=s.data().v;if(v!==undefined)S[k]=JSON.parse(JSON.stringify(v))}if(!s.metadata.fromCache){got++}if(got>=K.length&&!loaded){loaded=true;clearTimeout(tm)}sync();rerender()},e=>{clearTimeout(tm);loaded=true;sync();rerender()})}
+  setTimeout(()=>{if(!loaded){loaded=true;rerender()}},4000);sync()}
+
+/* ---------- calculations ---------- */
+const poBase=p=>p.items.reduce((a,i)=>a+num(i.q)*num(i.rate),0);
+const poTotal=p=>{const b=poBase(p);return b+b*num(p.gst)/100+num(p.freight)};
+const recQty=(p,i)=>S.grns.filter(g=>g.po===p.id).reduce((a,g)=>a+num(g.lines[i]?.rec)-num(g.lines[i]?.rej),0);
+function poRecState(p){const r=p.items.map((it,i)=>recQty(p,i));if(r.every((x,i)=>x>=num(p.items[i].q)-1e-6))return 'Received';if(r.some(x=>x>0))return 'Partly received';return null}
+function acceptedValue(p){const b=p.items.reduce((a,it,i)=>a+Math.min(recQty(p,i),num(it.q))*num(it.rate),0);const share=poBase(p)?b/poBase(p):0;return b+b*num(p.gst)/100+num(p.freight)*share}
+const billPaid=b=>S.pays.filter(x=>x.bill===b.id).reduce((a,x)=>a+num(x.amt),0);
+const billTds=b=>num(b.base)*num(b.tdsPct)/100;
+const billNet=b=>num(b.total)-billTds(b);
+const billBal=b=>billNet(b)-billPaid(b);
+function match(b){const p=S.pos.find(x=>x.id===b.po);if(!p)return{ok:false,diff:0,acc:0};const acc=acceptedValue(p);const diff=num(b.total)-acc;return{ok:Math.abs(diff)<=Math.max(1,acc*0.005),diff,acc}}
+function billStatus(b){if(b.status==='On hold')return 'On hold';if(b.status!=='Approved')return match(b).ok?'Matched':'Mismatch';const pd=billPaid(b);if(pd>=billNet(b)-0.5)return 'Paid';if(pd>0)return 'Part paid';return b.due&&b.due<today()?'Overdue':'Approved – unpaid'}
+function ledger(vid){const e=[];for(const b of S.bills.filter(x=>x.vendor===vid&&x.status==='Approved')){e.push({d:b.date,t:'Bill '+b.inv+' (PO '+(S.pos.find(p=>p.id===b.po)?.no||'')+')',cr:num(b.total),dr:0});if(billTds(b))e.push({d:b.date,t:'TDS @'+b.tdsPct+'% on bill '+b.inv,cr:0,dr:billTds(b)})}
+  for(const p of S.pays.filter(x=>x.vendor===vid))e.push({d:p.date,t:'Payment '+p.mode+' · '+(p.utr||'—'),cr:0,dr:num(p.amt)});
+  e.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:b.cr-a.cr);let bal=0;for(const x of e){bal+=x.cr-x.dr;x.bal=bal}return e}
+function latestQuotes(r){const m={};for(const q of S.quotes.filter(q=>q.rfq===r.id)){if(!m[q.vendor]||q.round>m[q.vendor].round)m[q.vendor]=q}return Object.values(m)}
+const qTotal=(r,q)=>{const b=r.items.reduce((a,it,i)=>a+num(it.q)*num(q.rates[i]),0);return b+b*num(q.gst)/100+num(q.freight)};
+function words(n){n=Math.round(n);const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'],t=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const two=x=>x<20?a[x]:t[Math.floor(x/10)]+(x%10?' '+a[x%10]:'');const three=x=>(x>=100?a[Math.floor(x/100)]+' Hundred'+(x%100?' ':''):'')+(x%100?two(x%100):'');
+  if(!n)return 'Zero';const o=[];const cr=Math.floor(n/1e7);n%=1e7;const l=Math.floor(n/1e5);n%=1e5;const th=Math.floor(n/1e3);n%=1e3;
+  if(cr)o.push(words(cr)+' Crore');if(l)o.push(two(l)+' Lakh');if(th)o.push(two(th)+' Thousand');if(n)o.push(three(n));return o.join(' ')}
+const RX={gst:/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/,pan:/^[A-Z]{5}\d{4}[A-Z]$/,ifsc:/^[A-Z]{4}0[A-Z0-9]{6}$/,phone:/^[6-9]\d{9}$/};
+function checks(v){const g=(v.gstin||'').toUpperCase(),p=(v.pan||'').toUpperCase();return[
+  ['GSTIN format',RX.gst.test(g)],['PAN format',RX.pan.test(p)],['PAN matches GSTIN',RX.gst.test(g)&&g.slice(2,12)===p],
+  ['IFSC format',RX.ifsc.test((v.ifsc||'').toUpperCase())],['Bank account number',/^\d{9,18}$/.test(v.acno||'')],['Mobile number (10 digits)',RX.phone.test(v.phone||'')],
+  ...DOCS.filter(d=>d[2]).map(d=>[d[1]+' uploaded',!!(v.docs||{})[d[0]]])]}
+const wa=(phone,text)=>`https://wa.me/91${esc(String(phone||'').replace(/\D/g,'').slice(-10))}?text=${encodeURIComponent(text)}`;
+
+/* ---------- nav ---------- */
+const GS=[[null,[['dashboard','Overview','home']]],['Vendors',[['vendors','Vendors & KYC','users']]],['Sourcing',[['rfq','BOQ & RFQ','file'],['quotes','Quote comparison','chart']]],['Orders',[['po','Purchase orders','cart'],['grn','Goods receipt','truck']]],['Finance',[['bills','Bills','receipt'],['payments','Payments','wallet'],['ledger','Vendor ledger','book']]],['System',[['activity','Activity log','pulse']]]];
+const GV=[['Your account',[['my-profile','Profile & KYC','shield'],['my-rfq','Enquiries','file'],['my-po','Orders','cart'],['my-bills','Bills','receipt'],['my-ledger','Statement','book']]]];
+const STAFF=GS.flatMap(g=>g[1]),VEND=GV.flatMap(g=>g[1]);
+function counts(){return{vendors:S.vendors.filter(v=>v.status==='KYC Submitted').length,po:S.pos.filter(p=>p.status==='Pending approval').length,bills:S.bills.filter(b=>b.status==='Submitted').length,quotes:S.rfqs.filter(r=>r.status==='Comparing').length,payments:S.bills.filter(b=>billStatus(b)==='Overdue').length}}
+function renderNav(){const gs=isVendor()?GV:GS;const list=gs.flatMap(g=>g[1]);let cur=(location.hash||'').slice(1);if(!list.some(x=>x[0]===cur))cur=list[0][0];const c=isVendor()?{}:counts();
+  $('#nav').innerHTML=gs.map(([g,items])=>(g?`<div class="grp">${g}</div>`:'')+items.map(([h,l,i])=>`<a href="#${h}" class="${h===cur?'on':''}">${ic(i)}<span>${l}</span>${c[h]?`<span class="n ${['po','bills','payments'].includes(h)?'hot':''}">${c[h]}</span>`:''}</a>`).join('')).join('');
+  const it=list.find(x=>x[0]===cur);const grp=gs.find(g=>g[1].includes(it))[0];
+  $('#crumb').innerHTML=`${isVendor()?esc(V(myId()).name):'Mihir Group'}${grp?' / '+grp:''} / <b>${it[1]}</b>`;
+  $('#gsw').style.visibility=isVendor()?'hidden':'visible';return cur}
+function renderRoles(){const opts=`<optgroup label="Mihir team">${Object.entries(ROLES).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</optgroup>`+(S.vendors.length?`<optgroup label="Vendor login preview">${S.vendors.filter(v=>v.status!=='Blacklisted').map(v=>`<option value="vendor:${esc(v.id)}">${esc(v.name)}</option>`).join('')}</optgroup>`:'');
+  const r=$('#role');r.innerHTML=opts;r.value=role;if(r.value!==role){role='purchase';r.value=role}
+  const nm=isVendor()?V(myId()).name:ROLES[role];$('#whoav').outerHTML=av(nm).replace('class="av"','class="av" id="whoav"')}
+function render(){renderRoles();const cur=renderNav();$('#view').innerHTML=VIEWS[cur]();document.body.classList.remove('nav-open')}
+const table=(head,rows,cls='')=>rows.length?`<div class="tbl scroll"><table class="stack ${cls}"><thead><tr>${head.map(h=>`<th class="${/₹|Qty|Rate|Amount|Total|Balance|Value|Dr|Cr|days|Paid|payable/.test(h)?'num':''}">${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`:`<div class="tbl empty">${ic('inbox')}<div>Nothing here yet</div></div>`;
+const top=(t,p,btns='')=>`<div class="ph"><div><h1>${t}</h1>${p?`<p>${p}</p>`:''}</div><div class="row">${btns}</div></div>`;
+
+/* ---------- views ---------- */
+const VIEWS={};
+VIEWS.dashboard=()=>{
+  if(!loaded)return `<div class="card cb" style="max-width:640px"><div class="skel" style="width:40%"></div><div class="skel"></div><div class="skel" style="width:70%"></div></div>`;
+  const empty=K.slice(0,8).every(k=>!S[k].length);
+  if(empty)return `<div class="card hello"><div class="l"><div class="eyebrow">Mihir Group</div><h1>Set up your vendor portal</h1><p>Everything from a vendor's first WhatsApp invite to the last payment, on one page: KYC, BOQs sent as RFQs, negotiation rounds, approved POs, deliveries, bill matching, payments and a ledger for every vendor.</p><div class="row"><button class="pri" data-act="sample">${ic('arrow')}Explore with sample data</button><button data-act="newVendor">${ic('plus')}Add first vendor</button></div></div>
+  <ol><li><span><b>Onboard vendors</b>Invite, collect KYC, verify GST &amp; PAN</span></li><li><span><b>Share BOQ, collect quotes</b>Up to 3 rounds + a final round</span></li><li><span><b>Approve and send POs</b>Purchase head signs off every order</span></li><li><span><b>Receive, match, pay</b>GRN, 3-way bill match, ledger</span></li></ol></div>`;
+  const appr=S.bills.filter(b=>b.status==='Approved');
+  const out=appr.reduce((a,b)=>a+billBal(b),0);const overdue=S.bills.filter(b=>billStatus(b)==='Overdue');const odAmt=overdue.reduce((a,b)=>a+billBal(b),0);
+  const stages=[['Invited','awaiting KYC',S.vendors.filter(v=>v.status==='Invited').length,'vendors'],['KYC review','to verify',S.vendors.filter(v=>v.status==='KYC Submitted').length,'vendors'],['RFQ open','waiting for quotes',S.rfqs.filter(r=>r.status==='Open').length,'rfq'],['Compare','quotes received',S.rfqs.filter(r=>r.status==='Comparing').length,'quotes'],['PO approval','draft or pending',S.pos.filter(p=>['Draft','Pending approval'].includes(p.status)).length,'po'],['Delivery','POs pending GRN',S.pos.filter(p=>['Sent','Acknowledged','Approved','Partly received'].includes(p.status)).length,'grn'],['Bill check','to verify',S.bills.filter(b=>b.status==='Submitted').length,'bills'],['Payment','bills unpaid',appr.filter(b=>billBal(b)>0.5).length,'payments'],['Closed','bills fully paid',appr.filter(b=>billBal(b)<=0.5).length,'ledger']];
+  const todo=[...overdue.map(b=>['clock','bad',`Pay ${esc(V(b.vendor).name)}`,`Bill ${esc(b.inv)} · overdue since ${fd(b.due)} · ${inr(billBal(b))}`,'payBill',b.id,'Pay']),
+    ...S.pos.filter(p=>p.status==='Pending approval').map(p=>['cart','warn',`Approve ${esc(p.no)}`,`${esc(V(p.vendor).name)} · ${inr(poTotal(p))}`,'openPO',p.id,'Review']),
+    ...S.bills.filter(b=>b.status==='Submitted').map(b=>{const m=match(b);return['receipt',m.ok?'blue':'bad',`Verify bill ${esc(b.inv)}`,`${esc(V(b.vendor).name)} · ${m.ok?'matches GRN':'differs from GRN by '+inr(m.diff)}`,'openBill',b.id,'Verify']}),
+    ...S.rfqs.filter(r=>r.status==='Comparing').map(r=>['chart','cu',`Compare quotes · ${esc(r.no)}`,`${esc(r.title)} · ${latestQuotes(r).length} of ${r.vendors.length} vendors quoted`,'compare',r.id,'Compare']),
+    ...S.vendors.filter(v=>v.status==='KYC Submitted').map(v=>['shield','warn',`Verify KYC · ${esc(v.name)}`,`${esc(v.cat)} · ${checks(v).filter(x=>x[1]).length}/${checks(v).length} checks pass`,'openVendor',v.id,'Review'])];
+  const t0=today(),dd=b=>Math.floor((new Date(t0)-new Date(b.due))/864e5);
+  const buckets=[['Not yet due',x=>dd(x)<=0,'light-dark(#26324f,#8fa3cf)'],['1–30 days overdue',x=>dd(x)>0&&dd(x)<=30,'#f79009'],['31–60 days',x=>dd(x)>30&&dd(x)<=60,'#e04f16'],['Over 60 days',x=>dd(x)>60,'#b42318']].map(([l,f,c])=>[l,appr.filter(b=>billBal(b)>0.5&&f(b)).reduce((a,b)=>a+billBal(b),0),c]);
+  const byV={};for(const b of appr)byV[b.vendor]=(byV[b.vendor]||0)+billBal(b);
+  const tops=Object.entries(byV).filter(x=>x[1]>0.5).sort((a,b)=>b[1]-a[1]).slice(0,5);const mx=tops[0]?.[1]||1;
+  const ordered=S.pos.filter(p=>!['Draft','Rejected','Pending approval'].includes(p.status));const hr=new Date().getHours();
+  return `<div class="ph"><div><div class="eyebrow">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div><h1>${hr<12?'Good morning':hr<17?'Good afternoon':'Good evening'}</h1><p>${todo.length?`${todo.length} item${todo.length>1?'s':''} need a decision${overdue.length?`, including ${overdue.length} overdue payment${overdue.length>1?'s':''}`:''}.`:'Nothing is waiting on you.'}</p></div><div class="row"><button data-act="newVendor">${ic('users')}Add vendor</button><button class="pri" data-act="newRfq">${ic('plus')}New BOQ / RFQ</button></div></div>
+  <div class="kpis"><div class="kpi"><span>${ic('wallet')}Outstanding payables</span><b>${inr(out)}</b><small>${odAmt?`<span style="color:var(--bad)">${inr(odAmt)} overdue</span>`:'nothing overdue'}</small></div>
+  <div class="kpi"><span>${ic('cart')}Ordered (approved POs)</span><b>${inr(ordered.reduce((a,p)=>a+poTotal(p),0))}</b><small>${ordered.length} purchase orders</small></div>
+  <div class="kpi"><span>${ic('rupee')}Paid to vendors</span><b>${inr(S.pays.reduce((a,p)=>a+num(p.amt),0))}</b><small>${S.pays.length} payment${S.pays.length===1?'':'s'} recorded</small></div>
+  <div class="kpi"><span>${ic('users')}Approved vendors</span><b>${S.vendors.filter(v=>v.status==='Approved').length}</b><small>${S.vendors.filter(v=>['Invited','KYC Submitted'].includes(v.status)).length} in onboarding</small></div></div>
+  <div class="card"><div class="ch"><div><h3>Procurement pipeline</h3><p>Live count at every stage. Click a stage to open it.</p></div></div><div class="pipe">${stages.map(s=>`<a class="st ${s[2]?'hot':''}" href="#${s[3]}"><span class="tick"></span><div class="k">${s[2]}</div><b>${s[0]}</b><small>${s[1]}</small></a>`).join('')}</div></div>
+  <div class="two"><div class="card"><div class="ch"><div><h3>Needs a decision</h3><p>Sorted by urgency</p></div><span class="pill">${todo.length}</span></div>${todo.length?`<ul class="inbox">${todo.slice(0,9).map(t=>`<li><span class="ico ${t[1]}">${ic(t[0])}</span><div><div class="t">${t[2]}</div><div class="m">${t[3]}</div></div><button class="sm" data-act="${t[4]}" data-id="${esc(t[5])}">${t[6]}</button></li>`).join('')}</ul>`:`<div class="empty">${ic('check')}<div>All clear</div></div>`}</div>
+  <div style="display:grid;gap:16px;align-content:start"><div class="card"><div class="ch"><div><h3>Payables ageing</h3><p>Approved bills still unpaid</p></div><b class="mono">${inr(out)}</b></div><div class="cb"><div class="age">${buckets.filter(b=>b[1]>0).map(b=>`<i style="width:${b[1]/(out||1)*100}%;background:${b[2]}"></i>`).join('')}</div><div class="leg">${buckets.map(b=>`<i style="background:${b[2]}"></i><span>${b[0]}</span><span class="num">${inr(b[1])}</span>`).join('')}</div></div></div>
+  <div class="card"><div class="ch"><h3>Top outstanding vendors</h3><a href="#ledger" class="small">Ledger →</a></div><div class="cb" style="padding-top:6px">${tops.length?tops.map(([id,v])=>`<div class="vbar">${av(V(id).name)}<div><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(V(id).name)}</span><span class="num">${inr(v)}</span></div><div class="bar"><i style="width:${v/mx*100}%"></i></div></div><span></span></div>`).join(''):'<p class="mute">No unpaid bills.</p>'}</div></div></div></div>
+  <div class="card" style="margin-top:16px"><div class="ch"><h3>Recent activity</h3><a href="#activity" class="small">View all →</a></div><ul class="feed">${S.log.slice(0,6).map(l=>`<li><span><b style="font-weight:500">${esc(l.who)}</b> <span class="mute">·</span> ${esc(l.msg)}</span><small>${new Date(l.t).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small></li>`).join('')}</ul></div>`};
+
+VIEWS.vendors=()=>{const f=VIEWS._vf||{};const list=S.vendors.filter(v=>(!f.s||v.status===f.s)&&(!f.c||v.cat===f.c)&&(!f.q||(v.name+v.gstin+v.contact).toLowerCase().includes(f.q.toLowerCase())));
+  return top('Vendors & KYC',`${S.vendors.length} vendors · ${S.vendors.filter(v=>v.status==='KYC Submitted').length} waiting for KYC check`,`<button class="pri" data-act="newVendor">${ic('plus')}Add / invite vendor</button>`)
+  +`<div class="filters"><input id="vq" placeholder="Search name, GSTIN, contact" value="${esc(f.q||'')}" style="max-width:280px"><select id="vs" style="max-width:190px"><option value="">All statuses</option>${['Invited','KYC Submitted','Approved','Rejected','Blacklisted'].map(s=>`<option ${f.s===s?'selected':''}>${s}</option>`).join('')}</select><select id="vc" style="max-width:190px"><option value="">All categories</option>${S.settings.cats.map(s=>`<option ${f.c===s?'selected':''}>${esc(s)}</option>`).join('')}</select></div>`
+  +table(['Vendor','Category','Contact','GSTIN','KYC','Credit days','Status'],list.map(v=>{const c=checks(v);const okc=c.filter(x=>x[1]).length;return `<tr class="click" data-act="openVendor" data-id="${esc(v.id)}"><td>${vcell(v.id,v.city||'')}</td><td>${esc(v.cat)}</td><td>${esc(v.contact)}<div class="small mute">${esc(v.phone)}</div></td><td class="mono">${esc(v.gstin||'—')}</td><td><span class="mono">${okc}/${c.length}</span> <span class="mute small">checks</span></td><td class="num">${esc(v.credit||0)}</td><td>${pill(v.status)}</td></tr>`}))};
+
+VIEWS.rfq=()=>top('BOQ & RFQ','Share the BOQ with selected vendors, collect rates per item, run up to 3 negotiation rounds plus a final round.',`<button class="pri" data-act="newRfq">${ic('plus')}New BOQ / RFQ</button>`)
+  +table(['RFQ','Project','Items','Vendors invited','Quotes','Round','Due','Status'],S.rfqs.slice().reverse().map(r=>`<tr class="click" data-act="openRfq" data-id="${esc(r.id)}"><td><b>${esc(r.no)}</b><div class="small">${esc(r.title)}</div></td><td>${esc(r.project)}</td><td class="num">${r.items.length}</td><td class="num">${r.vendors.length}</td><td class="num">${latestQuotes(r).length}</td><td>${r.round>3?'Final':'R'+r.round}</td><td>${fd(r.due)}</td><td>${pill(r.status)}</td></tr>`));
+
+VIEWS.quotes=()=>{const rs=S.rfqs.filter(r=>S.quotes.some(q=>q.rfq===r.id));const sel=VIEWS._qr&&rs.find(r=>r.id===VIEWS._qr)?VIEWS._qr:rs.slice(-1)[0]?.id;
+  return top('Quotes & comparison','Rates are compared on the advance-payment basis. 30-day credit = advance rate + 2%.',rs.length?`<select id="qr" style="min-width:260px">${rs.map(r=>`<option value="${esc(r.id)}" ${r.id===sel?'selected':''}>${esc(r.no)} · ${esc(r.title)}</option>`).join('')}</select>`:'')
+  +(sel?compareHtml(S.rfqs.find(r=>r.id===sel)):`<div class="tbl empty">No quotes yet. Create an RFQ and record vendor quotes.</div>`)};
+function compareHtml(r){const qs=latestQuotes(r).sort((a,b)=>qTotal(r,a)-qTotal(r,b));if(!qs.length)return `<div class="tbl empty">No quotes received for ${esc(r.no)} yet.</div>`;
+  const l1=r.items.map((it,i)=>Math.min(...qs.map(q=>num(q.rates[i])||Infinity)));
+  const budget=r.items.reduce((a,it)=>a+num(it.q)*num(it.budget),0);const best=qTotal(r,qs[0]);
+  const hist=v=>S.quotes.filter(q=>q.rfq===r.id&&q.vendor===v).sort((a,b)=>a.round-b.round).map(q=>`R${q.round>3?'F':q.round}: ${inr(qTotal(r,q))}`).join(' → ');
+  return `<div class="kpis"><div class="kpi"><b>${qs.length}</b><span>vendors quoted (latest round)</span></div><div class="kpi"><b>${inr(best)}</b><span>L1 total · ${esc(V(qs[0].vendor).name)}</span></div><div class="kpi"><b>${inr(r.items.reduce((a,it,i)=>a+num(it.q)*(isFinite(l1[i])?l1[i]:0),0)*(1+num(qs[0].gst)/100))}</b><span>best item-wise split (incl. GST)</span></div>${budget?`<div class="kpi"><b style="color:${best<=budget*1.18?'var(--ok)':'var(--bad)'}">${inr(budget*1.18-best)}</b><span>vs budget (incl. 18% GST)</span></div>`:''}</div>
+  <div class="tbl scroll"><table><thead><tr><th>Item</th><th class="num">Qty</th>${qs.map((q,k)=>`<th class="num">${k===0?'L1 · ':''}${esc(V(q.vendor).name)}<div class="small mute">Round ${q.round>3?'Final':q.round}</div></th>`).join('')}${budget?'<th class="num">Budget rate</th>':''}</tr></thead><tbody>
+  ${r.items.map((it,i)=>`<tr><td>${esc(it.d)}<div class="small mute">${esc(it.spec||'')}</div></td><td class="num">${esc(it.q)} ${esc(it.u)}</td>${qs.map(q=>`<td class="num ${num(q.rates[i])===l1[i]?'l1':''}">${q.rates[i]?inr(q.rates[i]):'—'}</td>`).join('')}${budget?`<td class="num">${inr(it.budget)}</td>`:''}</tr>`).join('')}
+  <tr><td>GST % · freight</td><td></td>${qs.map(q=>`<td class="num">${esc(q.gst)}% · ${inr(q.freight)}</td>`).join('')}${budget?'<td></td>':''}</tr>
+  <tr><td><b>Landed total</b></td><td></td>${qs.map(q=>`<td class="num"><b>${inr(qTotal(r,q))}</b></td>`).join('')}${budget?`<td class="num">${inr(budget)}</td>`:''}</tr>
+  <tr><td>30-day credit total (+2%)</td><td></td>${qs.map(q=>`<td class="num mute">${inr(qTotal(r,q)*1.02)}</td>`).join('')}${budget?'<td></td>':''}</tr>
+  <tr><td>Delivery · terms</td><td></td>${qs.map(q=>`<td class="num small">${esc(q.days)} days<br>${esc(q.terms||'')}</td>`).join('')}${budget?'<td></td>':''}</tr>
+  <tr><td>Negotiation history</td><td></td>${qs.map(q=>`<td class="num small mute">${hist(q.vendor)}</td>`).join('')}${budget?'<td></td>':''}</tr>
+  </tbody></table></div>
+  <div class="row" style="margin-top:14px">${r.status==='Awarded'?pill('Awarded')+' <span class="mute">POs drafted for this RFQ.</span>':`<button class="pri" data-act="award" data-id="${esc(r.id)}" data-mode="l1">Award all to L1 → draft PO</button><button data-act="award" data-id="${esc(r.id)}" data-mode="split">Split item-wise to L1 → draft POs</button>${r.round<4?`<button data-act="nextRound" data-id="${esc(r.id)}">Start ${r.round<3?'round '+(r.round+1):'final round'}</button>`:''}`}</div>`}
+
+VIEWS.po=()=>top('Purchase orders','Every PO is drafted, reviewed and edited by purchase, then approved by the purchase head before it goes to the vendor.',`<button class="pri" data-act="newPO">${ic('plus')}Direct PO</button>`)
+  +table(['PO','Vendor','Project','Value','Date','Status'],S.pos.slice().reverse().map(p=>`<tr class="click" data-act="openPO" data-id="${esc(p.id)}"><td><b>${esc(p.no)}</b><div class="small mute">${esc(S.rfqs.find(r=>r.id===p.rfq)?.no||'Direct')}</div></td><td>${vcell(p.vendor)}</td><td>${esc(p.project)}</td><td class="num">${inr(poTotal(p))}</td><td>${fd(p.date)}</td><td>${pill(p.status)}</td></tr>`));
+
+VIEWS.grn=()=>{const open=S.pos.filter(p=>['Approved','Sent','Acknowledged','Partly received'].includes(p.status));
+  return top('Goods received (GRN)',`${open.length} POs waiting for delivery`,`<button class="pri" data-act="newGRN" ${open.length?'':'disabled'}>${ic('truck')}Record delivery</button>`)
+  +table(['GRN','PO','Vendor','Date','Challan · vehicle','Lines','Received by'],S.grns.slice().reverse().map(g=>{const p=S.pos.find(x=>x.id===g.po)||{items:[]};return `<tr><td><b>${esc(g.no)}</b></td><td>${esc(p.no)}</td><td>${esc(V(p.vendor).name)}</td><td>${fd(g.date)}</td><td>${esc(g.challan)} · ${esc(g.vehicle)}</td><td>${g.lines.map((l,i)=>`${esc(p.items[i]?.d)}: ${esc(l.rec)}${num(l.rej)?` <span style="color:var(--bad)">(−${esc(l.rej)} rej)</span>`:''}`).join('<br>')}</td><td>${esc(g.by)}</td></tr>`}))};
+
+VIEWS.bills=()=>top('Vendor bills','Each bill is matched 3-way: PO rate × accepted GRN quantity vs invoice amount (0.5% tolerance).',`<button class="pri" data-act="newBill">${ic('plus')}Enter vendor bill</button>`)
+  +table(['Bill','Vendor','PO','Bill date','Invoice total','GRN value','Due','Status'],S.bills.slice().reverse().map(b=>{const m=match(b);return `<tr class="click" data-act="openBill" data-id="${esc(b.id)}"><td class="mono">${esc(b.inv)}</td><td>${vcell(b.vendor)}</td><td>${esc(S.pos.find(p=>p.id===b.po)?.no)}</td><td>${fd(b.date)}</td><td class="num">${inr(b.total)}</td><td class="num">${inr(m.acc)}</td><td>${fd(b.due)}</td><td>${pill(billStatus(b))}</td></tr>`}));
+
+VIEWS.payments=()=>{const due=S.bills.filter(b=>b.status==='Approved'&&billBal(b)>0.5).sort((a,b)=>a.due<b.due?-1:1);
+  return top('Payments',`${inr(due.reduce((a,b)=>a+billBal(b),0))} to pay across ${due.length} bills`)
+  +`<h3 style="margin:6px 0 8px">Due for payment</h3>`+table(['Vendor','Bill','Due','Net payable','Paid','Balance',''],due.map(b=>`<tr><td>${vcell(b.vendor)}</td><td class="mono">${esc(b.inv)}</td><td>${b.due<today()?`<b style="color:var(--bad)">${fd(b.due)}</b>`:fd(b.due)}</td><td class="num">${inr(billNet(b))}</td><td class="num">${inr(billPaid(b))}</td><td class="num"><b>${inr(billBal(b))}</b></td><td><button class="sm pri" data-act="payBill" data-id="${esc(b.id)}" ${can('pay')?'':'disabled title="Accounts team only"'}>Pay</button></td></tr>`))
+  +`<h3 style="margin:22px 0 8px">Payment history</h3>`+table(['Date','Vendor','Bill','Mode','UTR / cheque','Amount',''],S.pays.slice().reverse().map(p=>{const v=V(p.vendor);const b=S.bills.find(x=>x.id===p.bill);return `<tr><td>${fd(p.date)}</td><td>${esc(v.name)}</td><td>${esc(b?.inv)}</td><td>${esc(p.mode)}</td><td>${esc(p.utr)}</td><td class="num">${inr(p.amt)}</td><td><a class="btn sm wa" target="_blank" href="${wa(v.phone,`Payment advice – Mihir Group\nPaid ${inr(p.amt)} on ${fd(p.date)} by ${p.mode} (Ref ${p.utr}) against your bill ${b?.inv||''}.`)}">WhatsApp advice</a></td></tr>`}))};
+
+function ledgerHtml(vid,staff){const v=V(vid);const e=ledger(vid);const bills=S.bills.filter(b=>b.vendor===vid&&b.status==='Approved');
+  const billed=bills.reduce((a,b)=>a+num(b.total),0),tds=bills.reduce((a,b)=>a+billTds(b),0),paid=S.pays.filter(p=>p.vendor===vid).reduce((a,p)=>a+num(p.amt),0),od=bills.filter(b=>billStatus(b)==='Overdue').reduce((a,b)=>a+billBal(b),0);
+  return `<div class="kpis"><div class="kpi"><b>${inr(billed)}</b><span>billed (approved)</span></div><div class="kpi"><b>${inr(tds)}</b><span>TDS deducted</span></div><div class="kpi"><b>${inr(paid)}</b><span>paid</span></div><div class="kpi"><b>${inr(billed-tds-paid)}</b><span>outstanding${od?` · <span style="color:var(--bad)">${inr(od)} overdue</span>`:''}</span></div></div>`
+  +table(['Date','Particulars','Dr ₹ (paid / TDS)','Cr ₹ (billed)','Balance ₹'],e.map(x=>`<tr><td>${fd(x.d)}</td><td>${esc(x.t)}</td><td class="num">${x.dr?inr(x.dr):''}</td><td class="num">${x.cr?inr(x.cr):''}</td><td class="num"><b>${inr(x.bal)} Cr</b></td></tr>`))
+  +`<div class="row" style="margin-top:12px"><button data-act="copyLedger" data-id="${esc(vid)}">Copy ledger (CSV for Excel / Tally)</button>${staff?`<a class="btn wa" target="_blank" href="${wa(v.phone,`Ledger summary – Mihir Group\n${v.name}\nBilled: ${inr(billed)}\nTDS: ${inr(tds)}\nPaid: ${inr(paid)}\nOutstanding: ${inr(billed-tds-paid)}\nPlease confirm the balance.`)}">Send balance confirmation on WhatsApp</a>`:''}</div>`}
+VIEWS.ledger=()=>{const vs=S.vendors.filter(v=>v.status==='Approved'||S.bills.some(b=>b.vendor===v.id));const sel=VIEWS._lv&&vs.some(v=>v.id===VIEWS._lv)?VIEWS._lv:vs[0]?.id;
+  return top('Vendor ledger','Bills credit the vendor; payments and TDS debit. Running balance is what Mihir owes.',vs.length?`<select id="lv" style="min-width:260px">${vs.map(v=>`<option value="${esc(v.id)}" ${v.id===sel?'selected':''}>${esc(v.name)}</option>`).join('')}</select>`:'')+(sel?ledgerHtml(sel,true):`<div class="tbl empty">No approved vendors yet.</div>`)};
+VIEWS.activity=()=>top('Activity log','Every step, who did it and when.')+table(['When','Who','What'],S.log.map(l=>`<tr><td class="small">${new Date(l.t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(l.who)}</td><td>${esc(l.msg)}</td></tr>`))+`<div class="row" style="margin-top:18px"><button data-act="settings">Projects &amp; categories</button><button class="danger" data-act="reset">Clear all data</button></div>`;
+
+/* vendor-side views */
+VIEWS['my-profile']=()=>{const v=V(myId());return top(esc(v.name),`KYC status: ${esc(v.status)}`)+(v.status==='Approved'?'<div class="note ok">Your KYC is approved. You will receive Mihir Group enquiries for '+esc(v.cat)+'.</div>':v.status==='Rejected'?`<div class="note">KYC was sent back: ${esc(v.remark||'')}. Please correct and resubmit.</div>`:'')+`<div class="card cb">${vendorForm(v,true)}</div>`};
+VIEWS['my-rfq']=()=>{const rs=S.rfqs.filter(r=>r.vendors.includes(myId()));return top('Enquiries from Mihir Group','Fill your advance-payment rate for each item. Quote again whenever a new round opens.')
+  +table(['RFQ','Project','Items','Round','Due','Your quote',''],rs.slice().reverse().map(r=>{const mine=S.quotes.filter(q=>q.rfq===r.id&&q.vendor===myId());const cur=mine.find(q=>q.round===r.round);return `<tr><td><b>${esc(r.no)}</b><div class="small">${esc(r.title)}</div></td><td>${esc(r.project)}</td><td class="num">${r.items.length}</td><td>${r.round>3?'Final':'R'+r.round}</td><td>${fd(r.due)}</td><td>${cur?pill('Submitted')+' '+inr(qTotal(r,cur)):mine.length?'Previous: '+inr(qTotal(r,mine.slice(-1)[0])):'—'}</td><td>${['Open','Comparing'].includes(r.status)?`<button class="sm pri" data-act="quote" data-id="${esc(r.id)}" data-v="${esc(myId())}">${cur?'Revise':'Submit'} quote</button>`:pill(r.status)}</td></tr>`}))};
+VIEWS['my-po']=()=>top('My purchase orders')+table(['PO','Project','Value','Date','Status',''],S.pos.filter(p=>p.vendor===myId()&&!['Draft','Pending approval','Rejected'].includes(p.status)).map(p=>`<tr><td><b>${esc(p.no)}</b></td><td>${esc(p.project)}</td><td class="num">${inr(poTotal(p))}</td><td>${fd(p.date)}</td><td>${pill(p.status)}</td><td class="row"><button class="sm" data-act="viewPO" data-id="${esc(p.id)}">View PO</button>${p.status==='Sent'?`<button class="sm pri" data-act="ackPO" data-id="${esc(p.id)}">Accept PO</button>`:''}</td></tr>`));
+VIEWS['my-bills']=()=>top('My bills','Upload your tax invoice against a PO. You can track verification and payment here.',`<button class="pri" data-act="newBill">Submit invoice</button>`)+table(['Invoice','PO','Date','Amount','Paid','Status'],S.bills.filter(b=>b.vendor===myId()).map(b=>`<tr><td>${esc(b.inv)}</td><td>${esc(S.pos.find(p=>p.id===b.po)?.no)}</td><td>${fd(b.date)}</td><td class="num">${inr(b.total)}</td><td class="num">${inr(billPaid(b))}</td><td>${pill(b.status==='Submitted'?'Submitted':billStatus(b))}</td></tr>`));
+VIEWS['my-ledger']=()=>top('Account statement with Mihir Group')+ledgerHtml(myId(),false);
+
+/* ---------- modal ---------- */
+function modal(t,h){$('#mt').textContent=t;$('#mbody').innerHTML=h;$('#ov').classList.add('on');$('#ov').scrollTop=0}
+function close(){$('#ov').classList.remove('on')}
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+
+function vendorForm(v,self){const d=v.docs||{};const c=checks(v);return `<form id="vf" data-id="${esc(v.id||'')}">
+  <div class="grid"><label>Firm name *<input id="f_name" required value="${esc(v.name)}"></label><label>Category<select id="f_cat">${S.settings.cats.map(c=>`<option ${v.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
+  <label>Contact person<input id="f_contact" value="${esc(v.contact)}"></label><label>Mobile (WhatsApp) *<input id="f_phone" inputmode="numeric" value="${esc(v.phone)}"></label>
+  <label>Email<input id="f_email" type="email" value="${esc(v.email)}"></label><label>City<input id="f_city" value="${esc(v.city)}"></label></div>
+  <label style="margin-top:12px">Address<textarea id="f_addr">${esc(v.addr)}</textarea></label>
+  <div class="sec"><h3>Tax &amp; bank details</h3><div class="grid"><label>GSTIN<input id="f_gstin" value="${esc(v.gstin)}" style="text-transform:uppercase"></label><label>PAN<input id="f_pan" value="${esc(v.pan)}" style="text-transform:uppercase"></label>
+  <label>MSME / Udyam no.<input id="f_msme" value="${esc(v.msme)}"></label><label>Bank account no.<input id="f_acno" inputmode="numeric" value="${esc(v.acno)}"></label><label>IFSC<input id="f_ifsc" value="${esc(v.ifsc)}" style="text-transform:uppercase"></label><label>Account holder name<input id="f_acname" value="${esc(v.acname)}"></label>
+  ${self?'':`<label>Credit days<input id="f_credit" type="number" value="${esc(v.credit??30)}"></label>`}</div></div>
+  <div class="sec"><h3>KYC documents</h3><div class="tbl">${DOCS.map(x=>`<div class="kyc"><span>${x[1]}${x[2]?' *':''}<div class="small ${d[x[0]]?'':'mute'}" style="${d[x[0]]?'color:var(--ok)':''}">${d[x[0]]?'✓ '+esc(d[x[0]]):'Not uploaded'}</div></span><label class="btn sm" style="color:var(--ink)">${ic('upload')}${d[x[0]]?'Replace':'Upload'}<input type="file" data-doc="${x[0]}" style="display:none" accept=".pdf,image/*"></label></div>`).join('')}</div><p class="small mute">Demo keeps the file name only; the live portal stores the document itself.</p></div>
+  ${v.id?`<div class="sec"><h3>Automatic checks</h3><ul class="val">${c.map(x=>`<li>${x[1]?ic('check','y'):ic('x','n')}${x[0]}</li>`).join('')}</ul></div>`:''}
+  <div class="row" style="margin-top:16px">${self?`<button class="pri" type="submit" data-sub="kyc">Save &amp; submit for KYC</button>`:`<button class="pri" type="submit">Save vendor</button>`}</div></form>`}
+function readVendor(base){const f=['name','cat','contact','phone','email','city','addr','gstin','pan','msme','acno','ifsc','acname'];const v=Object.assign({},base);for(const k of f)v[k]=val('f_'+k);v.gstin=v.gstin.toUpperCase();v.pan=v.pan.toUpperCase();v.ifsc=v.ifsc.toUpperCase();v.phone=v.phone.replace(/\D/g,'').slice(-10);if(document.getElementById('f_credit'))v.credit=num(val('f_credit'));return v}
+
+function openVendor(id){const v=S.vendors.find(x=>x.id===id);if(!v)return;const c=checks(v);const okAll=c.every(x=>x[1]);
+  const msg=`Hello ${v.contact||''}, Mihir Group invites ${v.name} to register as a vendor. Please complete your profile and KYC (GST, PAN, cancelled cheque, address proof) on the Mihir vendor portal.`;
+  modal(v.name,`<div class="row" style="margin-bottom:14px">${av(v.name,40)}<div><div class="row">${pill(v.status)}<span class="mute small">${esc(v.cat)} · added ${fd(v.created)}</span></div></div>${v.remark?`<span class="mute">· Remark: ${esc(v.remark)}</span>`:''}</div>
+  <div class="row" style="margin-bottom:6px"><a class="btn sm wa" target="_blank" href="${wa(v.phone,msg)}">Send onboarding link on WhatsApp</a>${v.status==='KYC Submitted'||v.status==='Rejected'||v.status==='Invited'?`<button class="sm pri" data-act="kycOk" data-id="${esc(v.id)}" ${can('kyc')?'':'disabled'}>${okAll?'Approve KYC':'Approve KYC (checks incomplete)'}</button><button class="sm danger" data-act="kycNo" data-id="${esc(v.id)}" ${can('kyc')?'':'disabled'}>Send back</button>`:''}${v.status==='Approved'?`<button class="sm danger" data-act="blacklist" data-id="${esc(v.id)}">Blacklist</button>`:''}${v.status==='Blacklisted'?`<button class="sm" data-act="kycOk" data-id="${esc(v.id)}">Restore</button>`:''}</div>
+  <label style="max-width:420px;margin:10px 0">Remark for vendor (used when sending back)<input id="kycRemark" value="${esc(v.remark||'')}"></label>
+  ${vendorForm(v,false)}`)}
+
+function rfqForm(){const ap=S.vendors.filter(v=>v.status==='Approved');return `<form id="rf"><div class="grid"><label>Project / site<select id="r_project">${S.settings.projects.map(p=>`<option>${esc(p)}</option>`).join('')}</select></label><label>Title *<input id="r_title" required placeholder="e.g. OPC cement for slab cycle"></label><label>Category<select id="r_cat">${S.settings.cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label><label>Quote due date<input id="r_due" type="date" value="${today(3)}"></label></div>
+  <div class="sec"><h3>BOQ items</h3><div class="tbl scroll"><table><thead><tr><th>Description</th><th>Unit</th><th class="num">Qty</th><th>Spec / make</th><th class="num">Budget rate</th></tr></thead><tbody id="rItems">${itemRow()}${itemRow()}</tbody></table></div>
+  <div class="row" style="margin-top:8px"><button type="button" class="sm" data-act="addItem">Add item</button></div>
+  <label style="margin-top:10px">Or paste BOQ rows from Excel (Description, Unit, Qty, Spec, Budget rate)<textarea id="r_paste" placeholder="OPC 53 cement	Bag	1500	UltraTech / ACC	380"></textarea></label><button type="button" class="sm" data-act="pasteBoq" style="margin-top:6px">Add pasted rows</button></div>
+  <div class="sec"><h3>Send to vendors</h3><p class="small mute">Only KYC-approved vendors are listed.</p><div class="grid" id="rVend">${ap.map(v=>`<label class="chk"><input type="checkbox" value="${esc(v.id)}" data-cat="${esc(v.cat)}"> ${esc(v.name)} <span class="small mute">${esc(v.cat)}</span></label>`).join('')||'<p class="mute">No approved vendors yet.</p>'}</div></div>
+  <label style="margin-top:12px">Terms shared with vendors<textarea id="r_terms">Rates on advance-payment basis, inclusive of loading & unloading at site. GST extra as applicable. Delivery to site as per schedule.</textarea></label>
+  <div class="row" style="margin-top:16px"><button class="pri" type="submit">Create RFQ</button></div></form>`}
+const itemRow=(it={})=>`<tr><td><input class="i_d" value="${esc(it.d||'')}"></td><td><input class="i_u" value="${esc(it.u||'Nos')}" style="width:80px"></td><td><input class="i_q" type="number" step="any" value="${esc(it.q||'')}" style="width:100px"></td><td><input class="i_s" value="${esc(it.spec||'')}"></td><td><input class="i_b" type="number" step="any" value="${esc(it.budget||'')}" style="width:110px"></td></tr>`;
+
+function openRfq(id){const r=S.rfqs.find(x=>x.id===id);if(!r)return;
+  const txt=v=>`Mihir Group – Request for Quotation ${r.no}\nProject: ${r.project}\n${r.title}\nRound: ${r.round>3?'Final':r.round}\n\n${r.items.map((it,i)=>`${i+1}. ${it.d} – ${it.q} ${it.u}${it.spec?' ('+it.spec+')':''}`).join('\n')}\n\nPlease quote advance-payment rates per item by ${fd(r.due)} on the Mihir vendor portal.\n${r.terms||''}`;
+  modal(`${r.no} · ${r.title}`,`<div class="row">${pill(r.status)}<span class="mute">${esc(r.project)} · due ${fd(r.due)} · round ${r.round>3?'Final':r.round}</span></div>
+  <div class="sec"><h3>BOQ</h3>${table(['Item','Unit','Qty','Spec','Budget rate'],r.items.map(it=>`<tr><td>${esc(it.d)}</td><td>${esc(it.u)}</td><td class="num">${esc(it.q)}</td><td>${esc(it.spec)}</td><td class="num">${it.budget?inr(it.budget):'—'}</td></tr>`))}</div>
+  <div class="sec"><h3>Vendors</h3>${table(['Vendor','This round','Latest total',''],r.vendors.map(vid=>{const v=V(vid);const q=S.quotes.filter(q=>q.rfq===r.id&&q.vendor===vid).sort((a,b)=>b.round-a.round)[0];return `<tr><td>${esc(v.name)}<div class="small mute">${esc(v.phone)}</div></td><td>${q&&q.round===r.round?pill('Submitted'):pill('Pending')}</td><td class="num">${q?inr(qTotal(r,q)):'—'}</td><td class="row"><a class="btn sm wa" target="_blank" href="${wa(v.phone,txt(v))}">Share BOQ on WhatsApp</a>${r.status!=='Awarded'?`<button class="sm" data-act="quote" data-id="${esc(r.id)}" data-v="${esc(vid)}">Enter quote</button>`:''}</td></tr>`}))}</div>
+  <div class="row" style="margin-top:14px"><button class="pri" data-act="compare" data-id="${esc(r.id)}">Open comparison</button><button data-act="copyText" data-t="${esc(txt())}">Copy RFQ text</button></div>`)}
+
+function quoteForm(r,vid){const prev=S.quotes.filter(q=>q.rfq===r.id&&q.vendor===vid).sort((a,b)=>b.round-a.round)[0]||{rates:[],gst:18,freight:0,days:7,terms:''};
+  modal(`Quote · ${r.no} · round ${r.round>3?'Final':r.round}`,`<p class="mute">${esc(V(vid).name)} · advance-payment rates per unit, before GST.</p><form id="qf" data-r="${esc(r.id)}" data-v="${esc(vid)}">
+  ${table(['Item','Qty','Rate ₹ / unit','Amount'],r.items.map((it,i)=>`<tr><td>${esc(it.d)}<div class="small mute">${esc(it.spec)}</div></td><td class="num">${esc(it.q)} ${esc(it.u)}</td><td class="num"><input class="q_r" type="number" step="any" data-q="${esc(it.q)}" value="${esc(prev.rates[i]||'')}" style="max-width:140px;text-align:right"></td><td class="num q_a">—</td></tr>`))}
+  <div class="grid" style="margin-top:12px"><label>GST %<select id="q_gst">${[0,5,12,18,28].map(g=>`<option ${num(prev.gst)===g?'selected':''}>${g}</option>`).join('')}</select></label><label>Freight / transport ₹<input id="q_fr" type="number" value="${esc(prev.freight)}"></label><label>Delivery (days)<input id="q_days" type="number" value="${esc(prev.days)}"></label><label>Remarks / make<input id="q_terms" value="${esc(prev.terms)}"></label></div>
+  <div class="row" style="margin-top:14px;justify-content:space-between"><b id="q_tot">Total: —</b><button class="pri" type="submit">Submit quote</button></div></form>`);qCalc()}
+function qCalc(){let b=0;document.querySelectorAll('.q_r').forEach(i=>{const a=num(i.value)*num(i.dataset.q);b+=a;i.closest('tr').querySelector('.q_a').textContent=a?inr(a):'—'});const t=$('#q_tot');if(t)t.textContent='Total incl. GST & freight: '+inr(b*(1+num(val('q_gst'))/100)+num(val('q_fr')))}
+
+function poDoc(p){const v=V(p.vendor);const b=poBase(p),g=b*num(p.gst)/100;return `<div class="doc"><div class="dh"><div class="row"><img src="${LOGO}" alt="Mihir"><div><b style="font:600 20px Outfit">MIHIR GROUP</b><div class="small">Purchase Order</div></div></div><div class="small" style="text-align:right"><b>${esc(p.no)}</b><br>Date: ${fd(p.date)}<br>Project: ${esc(p.project)}</div></div>
+  <div class="small"><b>To:</b> ${esc(v.name)}, ${esc(v.addr||v.city||'')}<br>GSTIN: ${esc(v.gstin||'—')} · Contact: ${esc(v.contact||'')} ${esc(v.phone||'')}</div>
+  <table style="margin-top:12px"><thead><tr><th>#</th><th>Description</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead><tbody>${p.items.map((it,i)=>`<tr><td>${i+1}</td><td>${esc(it.d)}<div class="small">${esc(it.spec||'')}</div></td><td class="num">${esc(it.q)} ${esc(it.u)}</td><td class="num">${inr(it.rate)}</td><td class="num">${inr(num(it.q)*num(it.rate))}</td></tr>`).join('')}
+  <tr><td></td><td colspan="3">Taxable value</td><td class="num">${inr(b)}</td></tr><tr><td></td><td colspan="3">GST @ ${esc(p.gst)}%</td><td class="num">${inr(g)}</td></tr><tr><td></td><td colspan="3">Freight</td><td class="num">${inr(p.freight)}</td></tr><tr><td></td><td colspan="3"><b>Total</b></td><td class="num"><b>${inr(poTotal(p))}</b></td></tr></tbody></table>
+  <p class="small"><b>Amount in words:</b> Rupees ${words(poTotal(p))} only</p><p class="small"><b>Terms:</b> ${esc(p.terms||'')}</p><p class="small">Payment: ${esc(v.credit||0)} days from receipt of bill with signed GRN. ${p.approvedBy?`Approved by ${esc(p.approvedBy)} on ${fd(p.approvedOn)}.`:''}</p></div>`}
+function poText(p){const v=V(p.vendor);return `Mihir Group – Purchase Order ${p.no}\nDate: ${fd(p.date)} · Project: ${p.project}\nTo: ${v.name}\n\n${p.items.map((it,i)=>`${i+1}. ${it.d} – ${it.q} ${it.u} @ ${inr(it.rate)} = ${inr(num(it.q)*num(it.rate))}`).join('\n')}\n\nGST ${p.gst}% · Freight ${inr(p.freight)}\nTotal: ${inr(poTotal(p))}\nTerms: ${p.terms||''}\nPlease confirm acceptance on the Mihir vendor portal.`}
+function openPO(id){const p=S.pos.find(x=>x.id===id);if(!p)return;const v=V(p.vendor);const edit=['Draft','Pending approval','Rejected'].includes(p.status)&&!isVendor();
+  modal(`${p.no} · ${v.name}`,`<div class="row" style="margin-bottom:12px">${pill(p.status)}${p.rejectNote?`<span class="mute">Head's note: ${esc(p.rejectNote)}</span>`:''}</div>
+  ${edit?`<form id="pf" data-id="${esc(p.id)}">${table(['Item','Qty','Rate ₹'],p.items.map((it,i)=>`<tr><td>${esc(it.d)}</td><td class="num"><input class="p_q" type="number" step="any" value="${esc(it.q)}" style="max-width:110px;text-align:right"> ${esc(it.u)}</td><td class="num"><input class="p_r" type="number" step="any" value="${esc(it.rate)}" style="max-width:130px;text-align:right"></td></tr>`))}
+  <div class="grid" style="margin-top:10px"><label>GST %<input id="p_gst" type="number" value="${esc(p.gst)}"></label><label>Freight ₹<input id="p_fr" type="number" value="${esc(p.freight)}"></label><label>Project<select id="p_proj">${S.settings.projects.map(x=>`<option ${x===p.project?'selected':''}>${esc(x)}</option>`).join('')}</select></label></div>
+  <label style="margin-top:10px">Terms<textarea id="p_terms">${esc(p.terms)}</textarea></label><div class="row" style="margin:12px 0"><button type="submit">Save changes</button>${p.status!=='Pending approval'?`<button type="button" class="pri" data-act="poSubmit" data-id="${esc(p.id)}">Submit for approval</button>`:''}</div></form>`:''}
+  ${p.status==='Pending approval'?`<div class="card cb" style="margin:12px 0"><h3>Purchase head review</h3><label style="margin-top:8px">Note (for rejection)<input id="p_note"></label><div class="row" style="margin-top:10px"><button class="pri" data-act="poApprove" data-id="${esc(p.id)}" ${can('approvePO')?'':'disabled'}>Approve PO</button><button class="danger" data-act="poReject" data-id="${esc(p.id)}" ${can('approvePO')?'':'disabled'}>Send back</button>${can('approvePO')?'':'<span class="small mute">Switch to "Purchase head" to approve.</span>'}</div></div>`:''}
+  ${p.status==='Approved'?`<div class="row" style="margin:12px 0"><a class="btn pri" target="_blank" href="${wa(v.phone,poText(p))}" data-act="poSent" data-id="${esc(p.id)}">Send PO on WhatsApp</a><button data-act="copyText" data-t="${esc(poText(p))}">Copy PO for email</button><span class="small mute">Email: ${esc(v.email||'—')}</span></div>`:''}
+  ${poDoc(p)}`)}
+
+function grnForm(pid){const open=S.pos.filter(p=>['Approved','Sent','Acknowledged','Partly received'].includes(p.status));const p=S.pos.find(x=>x.id===pid)||open[0];if(!p)return;
+  modal('Record delivery (GRN)',`<form id="gf" data-po="${esc(p.id)}"><label>Purchase order<select id="g_po">${open.map(x=>`<option value="${esc(x.id)}" ${x.id===p.id?'selected':''}>${esc(x.no)} · ${esc(V(x.vendor).name)}</option>`).join('')}</select></label>
+  <div class="grid" style="margin-top:10px"><label>Date<input id="g_date" type="date" value="${today()}"></label><label>Delivery challan no.<input id="g_ch"></label><label>Vehicle no.<input id="g_veh"></label><label>Received by<input id="g_by" placeholder="Store keeper / site engineer"></label></div>
+  <div class="sec">${table(['Item','Ordered','Received so far','Received now','Rejected'],p.items.map((it,i)=>`<tr><td>${esc(it.d)}</td><td class="num">${esc(it.q)} ${esc(it.u)}</td><td class="num">${recQty(p,i)}</td><td class="num"><input class="g_r" type="number" step="any" value="${Math.max(0,num(it.q)-recQty(p,i))}" style="max-width:110px;text-align:right"></td><td class="num"><input class="g_j" type="number" step="any" value="0" style="max-width:100px;text-align:right"></td></tr>`))}</div>
+  <div class="row" style="margin-top:14px"><button class="pri" type="submit">Save GRN</button></div></form>`)}
+
+function billForm(){const vend=isVendor();const pos=S.pos.filter(p=>['Sent','Acknowledged','Partly received','Received','Approved'].includes(p.status)&&(!vend||p.vendor===myId()));if(!pos.length){toast('No POs available to bill against yet');return}
+  modal(vend?'Submit tax invoice':'Enter vendor bill',`<form id="bf"><label>Against PO<select id="b_po">${pos.map(p=>`<option value="${esc(p.id)}">${esc(p.no)} · ${esc(V(p.vendor).name)} · ${inr(poTotal(p))}</option>`).join('')}</select></label>
+  <div class="grid" style="margin-top:10px"><label>Invoice no. *<input id="b_inv" required></label><label>Invoice date<input id="b_date" type="date" value="${today()}"></label><label>Taxable value ₹<input id="b_base" type="number" step="any"></label><label>GST amount ₹<input id="b_gst" type="number" step="any"></label>${vend?'':`<label>TDS<select id="b_tds"><option value="0">None</option><option value="0.1">0.1% · 194Q (goods)</option><option value="1">1% · 194C (individual/HUF)</option><option value="2">2% · 194C (others)</option></select></label>`}<label>Invoice copy<input type="file" id="b_file" accept=".pdf,image/*"></label></div>
+  <p id="b_hint" class="small mute"></p><div class="row" style="margin-top:14px"><button class="pri" type="submit">Submit bill</button></div></form>`);billHint()}
+function billHint(){const p=S.pos.find(x=>x.id===val('b_po'));const h=$('#b_hint');if(!p||!h)return;const acc=acceptedValue(p);h.textContent=`Accepted GRN value for ${p.no}: ${inr(acc)} (incl. GST & freight). PO value: ${inr(poTotal(p))}.`}
+function openBill(id){const b=S.bills.find(x=>x.id===id);if(!b)return;const p=S.pos.find(x=>x.id===b.po)||{items:[]};const m=match(b);
+  modal(`Bill ${b.inv} · ${V(b.vendor).name}`,`<div class="row">${pill(billStatus(b))}<span class="mute">PO ${esc(p.no)} · dated ${fd(b.date)} · due ${fd(b.due)}${b.file?' · file '+esc(b.file):''}</span></div>
+  <div class="sec"><h3>3-way match</h3>${table(['Item','PO qty','PO rate','Accepted GRN qty','Value'],p.items.map((it,i)=>`<tr><td>${esc(it.d)}</td><td class="num">${esc(it.q)}</td><td class="num">${inr(it.rate)}</td><td class="num">${recQty(p,i)}</td><td class="num">${inr(Math.min(recQty(p,i),num(it.q))*num(it.rate))}</td></tr>`))}
+  <div class="kpis" style="margin-top:12px"><div class="kpi"><b>${inr(m.acc)}</b><span>GRN value incl. GST</span></div><div class="kpi"><b>${inr(b.total)}</b><span>invoice total</span></div><div class="kpi"><b style="color:${m.ok?'var(--ok)':'var(--bad)'}">${m.ok?'Matched':inr(m.diff)}</b><span>${m.ok?'within 0.5%':'difference – raise debit note or hold'}</span></div><div class="kpi"><b>${inr(billNet(b))}</b><span>net payable after TDS ${inr(billTds(b))}</span></div></div></div>
+  ${b.status!=='Approved'?`<label style="max-width:520px">Accounts note<input id="b_note" value="${esc(b.note||'')}"></label><div class="row" style="margin-top:10px"><button class="pri" data-act="billOk" data-id="${esc(b.id)}" ${can('approveBill')?'':'disabled'}>Approve for payment</button><button class="danger" data-act="billHold" data-id="${esc(b.id)}" ${can('approveBill')?'':'disabled'}>Put on hold</button>${can('approveBill')?'':'<span class="small mute">Switch to "Accounts team" to approve.</span>'}</div>`:`<div class="row"><button class="pri" data-act="payBill" data-id="${esc(b.id)}" ${can('pay')&&billBal(b)>0.5?'':'disabled'}>Record payment</button><span class="mute">Balance ${inr(billBal(b))}</span></div>`}`)}
+function payForm(id){const b=S.bills.find(x=>x.id===id);if(!b)return;if(!can('pay')){toast('Switch to "Accounts team" to record payments');return}
+  modal(`Pay ${V(b.vendor).name}`,`<p class="mute">Bill ${esc(b.inv)} · net ${inr(billNet(b))} · balance ${inr(billBal(b))}</p><p class="small">Bank: ${esc(V(b.vendor).acname||'')} · A/c ${esc(V(b.vendor).acno||'—')} · IFSC ${esc(V(b.vendor).ifsc||'—')}</p><form id="yf" data-id="${esc(b.id)}"><div class="grid"><label>Amount ₹<input id="y_amt" type="number" step="any" value="${Math.round(billBal(b)*100)/100}"></label><label>Date<input id="y_date" type="date" value="${today()}"></label><label>Mode<select id="y_mode"><option>NEFT</option><option>RTGS</option><option>IMPS</option><option>Cheque</option><option>UPI</option></select></label><label>UTR / cheque no.<input id="y_utr"></label></div><div class="row" style="margin-top:14px"><button class="pri" type="submit">Save payment</button></div></form>`)}
+function poNewForm(){const ap=S.vendors.filter(v=>v.status==='Approved');if(!ap.length){toast('Approve a vendor first');return}
+  modal('Direct purchase order',`<form id="nf"><div class="grid"><label>Vendor<select id="n_v">${ap.map(v=>`<option value="${esc(v.id)}">${esc(v.name)}</option>`).join('')}</select></label><label>Project<select id="n_p">${S.settings.projects.map(p=>`<option>${esc(p)}</option>`).join('')}</select></label><label>GST %<input id="n_g" type="number" value="18"></label><label>Freight ₹<input id="n_f" type="number" value="0"></label></div>
+  <div class="sec"><div class="tbl scroll"><table><thead><tr><th>Description</th><th>Unit</th><th class="num">Qty</th><th>Spec</th><th class="num">Rate</th></tr></thead><tbody id="rItems">${itemRow()}${itemRow()}</tbody></table></div><button type="button" class="sm" data-act="addItem" style="margin-top:8px">Add item</button></div>
+  <label style="margin-top:10px">Reason for direct PO (no RFQ)<input id="n_why" placeholder="e.g. emergency / single source / rate contract"></label><div class="row" style="margin-top:14px"><button class="pri" type="submit">Create draft PO</button></div></form>`)}
+const readItems=()=>[...document.querySelectorAll('#rItems tr')].map(tr=>({d:tr.querySelector('.i_d').value.trim(),u:tr.querySelector('.i_u').value.trim(),q:num(tr.querySelector('.i_q').value),spec:tr.querySelector('.i_s').value.trim(),budget:num(tr.querySelector('.i_b').value)})).filter(i=>i.d&&i.q);
+function mkPO(vid,rfq,items,gst,freight,project,terms){const p={id:uid(),no:nextNo('PO',S.pos),rfq,vendor:vid,project,items,gst,freight,terms,date:today(),status:'Draft'};S.pos.push(p);return p}
+
+/* ---------- actions ---------- */
+const A={
+ close,
+ newVendor:()=>modal('Add / invite vendor',vendorForm({cat:S.settings.cats[0],credit:30,docs:{}},false)),
+ openVendor:d=>openVendor(d.id),
+ kycOk:d=>{const v=S.vendors.find(x=>x.id===d.id);v.status='Approved';v.remark='';v.kycOn=today();save('vendors');log(`KYC approved · ${v.name}`);close();render();toast('Vendor approved')},
+ kycNo:d=>{const v=S.vendors.find(x=>x.id===d.id);v.remark=val('kycRemark')||'Please correct the KYC details';v.status='Rejected';save('vendors');log(`KYC sent back · ${v.name} · ${v.remark}`);close();render();toast('Sent back to vendor')},
+ blacklist:d=>{const v=S.vendors.find(x=>x.id===d.id);v.status='Blacklisted';v.remark=val('kycRemark');save('vendors');log(`Blacklisted · ${v.name}`);close();render()},
+ newRfq:()=>modal('New BOQ / RFQ',rfqForm()),
+ addItem:()=>$('#rItems').insertAdjacentHTML('beforeend',itemRow()),
+ pasteBoq:()=>{const rows=val('r_paste').split(/\n/).map(l=>l.split('\t')).filter(c=>c[0]&&c[0].trim());const tb=$('#rItems');[...tb.querySelectorAll('tr')].forEach(tr=>{if(!tr.querySelector('.i_d').value)tr.remove()});tb.insertAdjacentHTML('beforeend',rows.map(c=>itemRow({d:c[0],u:c[1]||'Nos',q:num(c[2]),spec:c[3]||'',budget:num(c[4])})).join(''));$('#r_paste').value='';toast(rows.length+' rows added')},
+ openRfq:d=>openRfq(d.id),
+ quote:d=>quoteForm(S.rfqs.find(r=>r.id===d.id),d.v),
+ compare:d=>{VIEWS._qr=d.id;close();location.hash='quotes';render()},
+ nextRound:d=>{const r=S.rfqs.find(x=>x.id===d.id);r.round++;r.status='Open';r.due=today(2);save('rfqs');log(`${r.no} moved to ${r.round>3?'final round':'round '+r.round}`);render();toast('New round opened – share again with vendors')},
+ award:d=>{const r=S.rfqs.find(x=>x.id===d.id);const qs=latestQuotes(r).sort((a,b)=>qTotal(r,a)-qTotal(r,b));if(!qs.length)return;const made=[];
+   if(d.mode==='l1'){const q=qs[0];made.push(mkPO(q.vendor,r.id,r.items.map((it,i)=>({d:it.d,u:it.u,q:it.q,spec:it.spec,rate:num(q.rates[i])})),num(q.gst),num(q.freight),r.project,r.terms))}
+   else{const g={};r.items.forEach((it,i)=>{const q=qs.filter(q=>num(q.rates[i])>0).sort((a,b)=>num(a.rates[i])-num(b.rates[i]))[0];if(!q)return;(g[q.vendor]=g[q.vendor]||{q,items:[]}).items.push({d:it.d,u:it.u,q:it.q,spec:it.spec,rate:num(q.rates[i])})});for(const k in g)made.push(mkPO(k,r.id,g[k].items,num(g[k].q.gst),num(g[k].q.freight),r.project,r.terms))}
+   r.status='Awarded';save('rfqs');save('pos');log(`${r.no} awarded → ${made.map(p=>p.no+' ('+V(p.vendor).name+')').join(', ')}`);location.hash='po';render();toast(made.length+' draft PO(s) created – review & submit for approval')},
+ newPO:poNewForm,
+ openPO:d=>openPO(d.id),
+ viewPO:d=>{const p=S.pos.find(x=>x.id===d.id);modal(p.no,poDoc(p))},
+ poSubmit:d=>{const p=S.pos.find(x=>x.id===d.id);p.status='Pending approval';p.rejectNote='';save('pos');log(`${p.no} submitted for approval · ${inr(poTotal(p))}`);close();render();toast('Sent to purchase head')},
+ poApprove:d=>{const p=S.pos.find(x=>x.id===d.id);p.status='Approved';p.approvedBy=ROLES[role];p.approvedOn=today();save('pos');log(`${p.no} approved`);openPO(p.id);render()},
+ poReject:d=>{const p=S.pos.find(x=>x.id===d.id);p.status='Rejected';p.rejectNote=val('p_note');save('pos');log(`${p.no} sent back · ${p.rejectNote}`);close();render()},
+ poSent:d=>{const p=S.pos.find(x=>x.id===d.id);p.status='Sent';p.sentOn=today();save('pos');log(`${p.no} sent to ${V(p.vendor).name}`);setTimeout(()=>{close();render()},300);return true},
+ ackPO:d=>{const p=S.pos.find(x=>x.id===d.id);p.status='Acknowledged';save('pos');log(`${p.no} accepted by vendor`);render();toast('PO accepted')},
+ newGRN:()=>grnForm(),
+ newBill:billForm,
+ openBill:d=>openBill(d.id),
+ billOk:d=>{const b=S.bills.find(x=>x.id===d.id);b.status='Approved';b.note=val('b_note');b.approvedOn=today();save('bills');log(`Bill ${b.inv} approved for payment · ${V(b.vendor).name} · ${inr(billNet(b))}`);close();render();toast('Bill approved – now in Payments')},
+ billHold:d=>{const b=S.bills.find(x=>x.id===d.id);b.status='On hold';b.note=val('b_note');save('bills');log(`Bill ${b.inv} on hold · ${b.note}`);close();render()},
+ payBill:d=>payForm(d.id),
+ copyText:d=>{navigator.clipboard.writeText(d.t).then(()=>toast('Copied'),()=>toast('Copy blocked – select the text manually'))},
+ copyLedger:d=>{const e=ledger(d.id);const csv='Date,Particulars,Debit,Credit,Balance\n'+e.map(x=>[x.d,'"'+x.t.replace(/"/g,'""')+'"',x.dr.toFixed(2),x.cr.toFixed(2),x.bal.toFixed(2)].join(',')).join('\n');navigator.clipboard.writeText(csv).then(()=>toast('Ledger copied – paste into Excel'),()=>toast('Copy blocked'))},
+ settings:()=>modal('Projects & categories',`<form id="sf"><label>Projects / sites (one per line)<textarea id="s_p" rows="5">${esc(S.settings.projects.join('\n'))}</textarea></label><label style="margin-top:10px">Vendor categories (one per line)<textarea id="s_c" rows="8">${esc(S.settings.cats.join('\n'))}</textarea></label><div class="row" style="margin-top:12px"><button class="pri" type="submit">Save</button></div></form>`),
+ reset:()=>modal('Clear all data?',`<p>This removes every vendor, RFQ, quote, PO, GRN, bill, payment and the log for everyone using the portal.</p><div class="row"><button class="danger" data-act="resetYes">Yes, clear everything</button><button data-act="close">Cancel</button></div>`),
+ resetYes:()=>{for(const k of K.slice(0,8)){S[k]=[];save(k)}close();location.hash='dashboard';render()},
+ sample:()=>{loadSample();location.hash='dashboard';render();toast('Sample data loaded')},
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;if(e.target===$('#ov'))return;const a=A[el.dataset.act];if(!a)return;if(el.tagName==='A'&&el.target==='_blank'){a(el.dataset);return}e.preventDefault();a(el.dataset)});
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')close()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();GSR&&GSR.classList.remove('on');document.body.classList.remove('nav-open')}});
+$('#role').addEventListener('change',e=>{role=e.target.value;location.hash=isVendor()?'my-profile':'dashboard';render()});
+$('#menu').addEventListener('click',()=>document.body.classList.toggle('nav-open'));
+const GSI=$('#gs'),GSR=$('#gsr');
+function gsearch(){const q=GSI.value.trim().toLowerCase();if(!q){GSR.classList.remove('on');return}const hit=(...xs)=>xs.join(' ').toLowerCase().includes(q);
+  const r=[...S.vendors.filter(v=>hit(v.name,v.gstin,v.contact,v.cat)).map(v=>['openVendor',v.id,av(v.name,22),v.name,v.status]),
+    ...S.rfqs.filter(x=>hit(x.no,x.title,x.project)).map(x=>['openRfq',x.id,ic('file'),x.no+' · '+x.title,x.status]),
+    ...S.pos.filter(p=>hit(p.no,V(p.vendor).name)).map(p=>['openPO',p.id,ic('cart'),p.no+' · '+V(p.vendor).name,inr(poTotal(p))]),
+    ...S.bills.filter(b=>hit(b.inv,V(b.vendor).name)).map(b=>['openBill',b.id,ic('receipt'),'Bill '+b.inv+' · '+V(b.vendor).name,inr(b.total)])].slice(0,9);
+  GSR.innerHTML=r.length?r.map(x=>`<button data-act="${x[0]}" data-id="${esc(x[1])}">${x[2]}<span>${esc(x[3])}</span><small>${esc(x[4])}</small></button>`).join(''):'<div class="empty" style="padding:16px">No matches</div>';GSR.classList.add('on')}
+GSI.addEventListener('input',gsearch);GSI.addEventListener('focus',gsearch);
+document.addEventListener('click',e=>{if(!e.target.closest('#gsw'))GSR.classList.remove('on');else if(e.target.closest('#gsr [data-act]')){GSR.classList.remove('on');GSI.value=''}});
+document.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();GSI.focus()}});
+window.addEventListener('hashchange',render);
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='vq'){VIEWS._vf={...VIEWS._vf,q:t.value};const pos=t.selectionStart;render();const n=$('#vq');n.focus();n.setSelectionRange(pos,pos)}if(t.classList.contains('q_r')||t.id==='q_fr')qCalc()});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='vs')VIEWS._vf={...VIEWS._vf,s:t.value},render();if(t.id==='vc')VIEWS._vf={...VIEWS._vf,c:t.value},render();
+  if(t.id==='qr'){VIEWS._qr=t.value;render()}if(t.id==='lv'){VIEWS._lv=t.value;render()}if(t.id==='q_gst')qCalc();if(t.id==='b_po')billHint();if(t.id==='g_po')grnForm(t.value);
+  if(t.id==='r_cat'){document.querySelectorAll('#rVend input').forEach(c=>c.checked=c.dataset.cat===t.value)}
+  if(t.dataset.doc&&t.files[0]){const f=$('#vf');const id=f.dataset.id;const name=t.files[0].name;if(id){const v=S.vendors.find(x=>x.id===id);v.docs={...(v.docs||{}),[t.dataset.doc]:name};save('vendors');log(`KYC document uploaded · ${v.name} · ${name}`);t.closest('.kyc').querySelector('.small').textContent='✓ '+name}else{f._docs={...(f._docs||{}),[t.dataset.doc]:name};t.closest('.kyc').querySelector('.small').textContent='✓ '+name}}});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;
+  if(f.id==='vf'){const id=f.dataset.id;let v=S.vendors.find(x=>x.id===id);const self=!!f.querySelector('[data-sub=kyc]');
+    if(!val('f_name')){toast('Firm name is required');return}
+    if(v){Object.assign(v,readVendor(v));if(self){v.status='KYC Submitted';log(`KYC submitted · ${v.name}`)}else log(`Vendor details updated · ${v.name}`)}
+    else{v=readVendor({id:uid(),docs:f._docs||{},status:'Invited',created:today(),credit:30});S.vendors.push(v);log(`Vendor added · ${v.name}`)}
+    save('vendors');if(!self)close();render();toast(self?'Submitted for KYC verification':'Vendor saved');return}
+  if(f.id==='rf'){const items=readItems();const vs=[...document.querySelectorAll('#rVend input:checked')].map(c=>c.value);if(!val('r_title')||!items.length){toast('Add a title and at least one item with quantity');return}if(!vs.length){toast('Select at least one vendor');return}
+    const r={id:uid(),no:nextNo('RFQ',S.rfqs),project:val('r_project'),title:val('r_title'),cat:val('r_cat'),due:val('r_due'),items,vendors:vs,terms:val('r_terms'),round:1,status:'Open',created:today()};S.rfqs.push(r);save('rfqs');log(`${r.no} created · ${r.title} · sent to ${vs.length} vendors`);close();location.hash='rfq';render();openRfq(r.id);return}
+  if(f.id==='qf'){const r=S.rfqs.find(x=>x.id===f.dataset.r);const vid=f.dataset.v;const rates=[...document.querySelectorAll('.q_r')].map(i=>num(i.value));if(!rates.some(Boolean)){toast('Enter at least one rate');return}
+    S.quotes=S.quotes.filter(q=>!(q.rfq===r.id&&q.vendor===vid&&q.round===r.round));const q={id:uid(),rfq:r.id,vendor:vid,round:r.round,rates,gst:num(val('q_gst')),freight:num(val('q_fr')),days:num(val('q_days')),terms:val('q_terms'),on:today()};S.quotes.push(q);
+    if(r.status==='Open')r.status='Comparing';save('quotes');save('rfqs');log(`Quote · ${r.no} round ${r.round>3?'final':r.round} · ${V(vid).name} · ${inr(qTotal(r,q))}`);close();render();toast('Quote saved');return}
+  if(f.id==='pf'){const p=S.pos.find(x=>x.id===f.dataset.id);const qs=[...f.querySelectorAll('.p_q')],rs=[...f.querySelectorAll('.p_r')];p.items.forEach((it,i)=>{it.q=num(qs[i].value);it.rate=num(rs[i].value)});p.gst=num(val('p_gst'));p.freight=num(val('p_fr'));p.project=val('p_proj');p.terms=val('p_terms');if(p.status==='Rejected')p.status='Draft';save('pos');log(`${p.no} edited · ${inr(poTotal(p))}`);openPO(p.id);render();toast('PO updated');return}
+  if(f.id==='nf'){const items=readItems().map(i=>({...i,rate:i.budget}));if(!items.length){toast('Add at least one item');return}const p=mkPO(val('n_v'),null,items,num(val('n_g')),num(val('n_f')),val('n_p'),'Direct PO: '+(val('n_why')||'—'));save('pos');log(`${p.no} drafted (direct) · ${V(p.vendor).name}`);close();render();openPO(p.id);return}
+  if(f.id==='gf'){const p=S.pos.find(x=>x.id===val('g_po'));const r=[...f.querySelectorAll('.g_r')],j=[...f.querySelectorAll('.g_j')];const lines=p.items.map((it,i)=>({rec:num(r[i].value),rej:num(j[i].value)}));if(!lines.some(l=>l.rec)){toast('Enter received quantity');return}
+    const g={id:uid(),no:nextNo('GRN',S.grns),po:p.id,date:val('g_date'),challan:val('g_ch')||'—',vehicle:val('g_veh')||'—',by:val('g_by')||ROLES[role]||'Site',lines};S.grns.push(g);p.status=poRecState(p)||p.status;save('grns');save('pos');log(`${g.no} against ${p.no} · ${lines.map((l,i)=>p.items[i].d+' '+l.rec+(l.rej?' (−'+l.rej+' rej)':'')).join(', ')}`);close();render();toast('Delivery recorded');return}
+  if(f.id==='bf'){const p=S.pos.find(x=>x.id===val('b_po'));if(!val('b_inv')){toast('Invoice number is required');return}const base=num(val('b_base')),gst=num(val('b_gst'));
+    if(S.bills.some(b=>b.vendor===p.vendor&&b.inv.toLowerCase()===val('b_inv').toLowerCase())){toast('This invoice number is already entered for this vendor');return}
+    const b={id:uid(),po:p.id,vendor:p.vendor,inv:val('b_inv'),date:val('b_date'),base,gstAmt:gst,total:base+gst,tdsPct:num(val('b_tds')),due:addDays(val('b_date'),num(V(p.vendor).credit)),status:'Submitted',file:$('#b_file')?.files[0]?.name||''};S.bills.push(b);save('bills');log(`Bill ${b.inv} received · ${V(p.vendor).name} · ${inr(b.total)} · ${match(b).ok?'matches GRN':'mismatch '+inr(match(b).diff)}`);close();render();toast('Bill submitted');return}
+  if(f.id==='yf'){const b=S.bills.find(x=>x.id===f.dataset.id);const amt=num(val('y_amt'));if(amt<=0){toast('Enter amount');return}if(amt>billBal(b)+0.5){toast('Amount is more than the balance');return}
+    const p={id:uid(),bill:b.id,vendor:b.vendor,amt,date:val('y_date'),mode:val('y_mode'),utr:val('y_utr')};S.pays.push(p);save('pays');log(`Paid ${inr(amt)} to ${V(b.vendor).name} · ${p.mode} ${p.utr}`);close();render();toast('Payment recorded – ledger updated');return}
+  if(f.id==='sf'){S.settings.projects=val('s_p').split('\n').map(s=>s.trim()).filter(Boolean);S.settings.cats=val('s_c').split('\n').map(s=>s.trim()).filter(Boolean);save('settings');close();render();toast('Saved')}
+});
+
+/* ---------- sample data (only when someone clicks "Load sample data") ---------- */
+function loadSample(){const P=S.settings.projects;const mk=(name,cat,contact,city,pan,credit,status,docsAll=true)=>({id:uid(),name,cat,contact,phone:'98'+String(Math.floor(1e7+Math.random()*9e7)).slice(0,8),email:name.split(' ')[0].toLowerCase()+'@example.com',city,addr:city+', Maharashtra',gstin:'27'+pan+'1Z'+'5',pan,msme:'UDYAM-MH-26-00'+Math.floor(10000+Math.random()*89999),acno:String(Math.floor(1e11+Math.random()*9e11)),ifsc:'HDFC0001234',acname:name,credit,status,created:today(-40),docs:docsAll?{gst:'GST_certificate.pdf',pan:'PAN.pdf',cheque:'cancelled_cheque.jpg',addr:'shop_act.pdf'}:{gst:'GST.pdf'}});
+  const v=[mk('Shree Balaji Cement Depot','Cement','Ramesh Patil','Pune','AABFS1234K',30,'Approved'),mk('Mahalaxmi Building Materials','Cement','Sunil Jadhav','Pune','AAKFM5521Q',30,'Approved'),mk('Jai Bhavani Traders','Cement','Vikas More','Pimpri','ABCPJ7788L',15,'Approved'),
+   mk('Om Sai Steel Traders','Steel (TMT)','Anil Shah','Pune','AACFO4410R',45,'Approved'),mk('Raj Steel Corporation','Steel (TMT)','Rajesh Mehta','Mumbai','AADCR9021M',30,'Approved'),mk('Navkar Electricals','Electrical','Mahesh Jain','Pune','AAGFN3307P',30,'Approved'),
+   mk('Sahyadri Aggregates','Sand & aggregates','Ganesh Kale','Chakan','AARFS6612D',15,'KYC Submitted'),mk('Kalpataru Tiles Gallery','Tiles','Nilesh Doshi','Pune','AAQFK2209B',30,'Invited',false)];
+  S.vendors=v;
+  const r1={id:uid(),no:'RFQ-001',project:P[0],title:'Cement for Wing A slab cycle',cat:'Cement',due:today(-20),items:[{d:'OPC 53 grade cement',u:'Bag',q:1500,spec:'UltraTech / ACC / Ambuja',budget:395},{d:'PPC cement',u:'Bag',q:600,spec:'Any approved make',budget:360}],vendors:[v[0].id,v[1].id,v[2].id],terms:'Advance-payment rates, unloading at site included.',round:2,status:'Awarded',created:today(-25)};
+  const r2={id:uid(),no:'RFQ-002',project:P[0],title:'TMT steel for podium',cat:'Steel (TMT)',due:today(1),items:[{d:'TMT Fe500D 12 mm',u:'MT',q:18,spec:'Primary make',budget:61500},{d:'TMT Fe500D 8 mm',u:'MT',q:6,spec:'Primary make',budget:63000},{d:'Binding wire',u:'Kg',q:250,spec:'18 gauge',budget:85}],vendors:[v[3].id,v[4].id],terms:'Advance-payment rates. Mill test certificate required.',round:1,status:'Comparing',created:today(-3)};
+  const r3={id:uid(),no:'RFQ-003',project:P[1],title:'Electrical wiring – ground floor',cat:'Electrical',due:today(4),items:[{d:'FR copper wire 2.5 sq mm',u:'Coil',q:40,spec:'Polycab / Finolex',budget:2650},{d:'Modular switches 6A',u:'Nos',q:300,spec:'Anchor Roma',budget:68}],vendors:[v[5].id],terms:'',round:1,status:'Open',created:today(-1)};
+  S.rfqs=[r1,r2,r3];
+  const q=(r,vd,round,rates,gst,fr,days,terms,on)=>({id:uid(),rfq:r.id,vendor:vd.id,round,rates,gst,freight:fr,days,terms,on});
+  S.quotes=[q(r1,v[0],1,[402,368],28,0,3,'UltraTech',today(-22)),q(r1,v[1],1,[398,370],28,1500,4,'ACC',today(-22)),q(r1,v[2],1,[410,362],28,0,2,'Ambuja',today(-21)),q(r1,v[0],2,[389,355],28,0,3,'UltraTech',today(-19)),q(r1,v[1],2,[392,358],28,0,4,'ACC',today(-19)),
+    q(r2,v[3],1,[60800,62500,82],18,4500,5,'JSW Neosteel',today(-1)),q(r2,v[4],1,[61200,62100,80],18,0,7,'Tata Tiscon',today())];
+  const items1=r1.items.map((it,i)=>({d:it.d,u:it.u,q:it.q,spec:it.spec,rate:[389,355][i]}));
+  const po1={id:uid(),no:'PO-001',rfq:r1.id,vendor:v[0].id,project:P[0],items:items1,gst:28,freight:0,terms:r1.terms,date:today(-18),status:'Received',approvedBy:ROLES.head,approvedOn:today(-18)};
+  const po2={id:uid(),no:'PO-002',rfq:null,vendor:v[3].id,project:P[1],items:[{d:'TMT Fe500D 10 mm',u:'MT',q:8,spec:'JSW',rate:61000}],gst:18,freight:2500,terms:'Direct PO: rate contract',date:today(-12),status:'Partly received',approvedBy:ROLES.head,approvedOn:today(-12)};
+  const po3={id:uid(),no:'PO-003',rfq:null,vendor:v[5].id,project:P[1],items:[{d:'MCB 32A DP',u:'Nos',q:40,spec:'Legrand',rate:640},{d:'Distribution board 8-way',u:'Nos',q:10,spec:'Legrand',rate:3150}],gst:18,freight:0,terms:'Direct PO: urgent for meter room',date:today(),status:'Pending approval'};
+  S.pos=[po1,po2,po3];
+  S.grns=[{id:uid(),no:'GRN-001',po:po1.id,date:today(-15),challan:'DC-4471',vehicle:'MH12 QW 4410',by:'Site store – Wing A',lines:[{rec:1000,rej:0},{rec:600,rej:0}]},{id:uid(),no:'GRN-002',po:po1.id,date:today(-11),challan:'DC-4519',vehicle:'MH12 QW 4410',by:'Site store – Wing A',lines:[{rec:510,rej:10},{rec:0,rej:0}]},{id:uid(),no:'GRN-003',po:po2.id,date:today(-8),challan:'OS/882',vehicle:'MH14 HG 2201',by:'Site engineer',lines:[{rec:5,rej:0}]}];
+  const b1base=1500*389+600*355,b2base=8*61000;
+  S.bills=[{id:uid(),po:po1.id,vendor:v[0].id,inv:'SBC/25-26/311',date:today(-10),base:b1base,gstAmt:b1base*0.28,total:b1base*1.28,tdsPct:0.1,due:addDays(today(-10),30),status:'Approved',approvedOn:today(-8)},
+    {id:uid(),po:po2.id,vendor:v[3].id,inv:'OST/1187',date:today(-6),base:b2base,gstAmt:b2base*0.18,total:b2base*1.18+2500,tdsPct:0.1,due:addDays(today(-6),45),status:'Submitted'}];
+  S.pays=[{id:uid(),bill:S.bills[0].id,vendor:v[0].id,amt:500000,date:today(-4),mode:'NEFT',utr:'HDFCN52611904471'}];
+  S.log=[['Paid ₹5,00,000 to Shree Balaji Cement Depot · NEFT',-4],['Bill OST/1187 received · Om Sai Steel Traders · mismatch – only 5 of 8 MT received',-6],['Bill SBC/25-26/311 approved for payment',-8],['RFQ-001 awarded → PO-001 (Shree Balaji Cement Depot)',-18],['Sample data loaded',0]].map(([m,d])=>({t:new Date(Date.now()+d*864e5).toISOString(),who:'Sample',msg:m}));
+  for(const k of K.slice(0,8))save(k)}
+
+boot();
+}
+</script>
+</body>
+</html>
